@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="TestNG 项目报告">
+<test name="第一组测试">
+<classes>
+<class name="com.ttt.test.DecimalTest" />
+</classes>
+</test><!-- Test -->
+<listeners>
+<listener class-name="org.uncommons.reportng.HTMLReporter" />
+<listener class-name="org.uncommons.reportng.JUnitXMLReporter" />
+</listeners>
+</suite><!-- Suite -->
