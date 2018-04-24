@@ -12,9 +12,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import sun.misc.BASE64Encoder;
@@ -165,19 +162,6 @@ public class StringUtils {
         return str.toString();
     }
 
-    /**
-     * 函数名称: parseData 函数描述: 将json字符串转换为map
-     *
-     * @param data
-     * @return
-     */
-    public static Map<String, String> parseData(String data) {
-        GsonBuilder gb = new GsonBuilder();
-        Gson g = gb.create();
-        Map<String, String> map = g.fromJson(data, new TypeToken<Map<String, String>>() {
-        }.getType());
-        return map;
-    }
 
     public static String getOrderNumber() {
         Date date = new Date();
