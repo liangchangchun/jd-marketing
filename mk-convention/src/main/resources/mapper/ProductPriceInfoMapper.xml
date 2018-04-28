@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.convention.dao.ProductPriceInfoMapper">
+  <resultMap id="BaseResultMap" type="com.mk.convention.model.ProductPriceInfo">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="sku_id" jdbcType="BIGINT" property="skuId" />
+    <result column="marketPrice" jdbcType="DECIMAL" property="marketprice" />
+    <result column="nakedPrice" jdbcType="DECIMAL" property="nakedprice" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="taxPrice" jdbcType="DECIMAL" property="taxprice" />
+    <result column="tax" jdbcType="DECIMAL" property="tax" />
+    <result column="jdPrice" jdbcType="DECIMAL" property="jdprice" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, sku_id, marketPrice, nakedPrice, price, taxPrice, tax, jdPrice
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from product_price_info
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from product_price_info
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.convention.model.ProductPriceInfo">
+    insert into product_price_info (id, sku_id, marketPrice, 
+      nakedPrice, price, taxPrice, 
+      tax, jdPrice)
+    values (#{id,jdbcType=BIGINT}, #{skuId,jdbcType=BIGINT}, #{marketprice,jdbcType=DECIMAL}, 
+      #{nakedprice,jdbcType=DECIMAL}, #{price,jdbcType=DECIMAL}, #{taxprice,jdbcType=DECIMAL}, 
+      #{tax,jdbcType=DECIMAL}, #{jdprice,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.convention.model.ProductPriceInfo">
+    insert into product_price_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="skuId != null">
+        sku_id,
+      </if>
+      <if test="marketprice != null">
+        marketPrice,
+      </if>
+      <if test="nakedprice != null">
+        nakedPrice,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+      <if test="taxprice != null">
+        taxPrice,
+      </if>
+      <if test="tax != null">
+        tax,
+      </if>
+      <if test="jdprice != null">
+        jdPrice,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="skuId != null">
+        #{skuId,jdbcType=BIGINT},
+      </if>
+      <if test="marketprice != null">
+        #{marketprice,jdbcType=DECIMAL},
+      </if>
+      <if test="nakedprice != null">
+        #{nakedprice,jdbcType=DECIMAL},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="taxprice != null">
+        #{taxprice,jdbcType=DECIMAL},
+      </if>
+      <if test="tax != null">
+        #{tax,jdbcType=DECIMAL},
+      </if>
+      <if test="jdprice != null">
+        #{jdprice,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.convention.model.ProductPriceInfo">
+    update product_price_info
+    <set>
+      <if test="skuId != null">
+        sku_id = #{skuId,jdbcType=BIGINT},
+      </if>
+      <if test="marketprice != null">
+        marketPrice = #{marketprice,jdbcType=DECIMAL},
+      </if>
+      <if test="nakedprice != null">
+        nakedPrice = #{nakedprice,jdbcType=DECIMAL},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="taxprice != null">
+        taxPrice = #{taxprice,jdbcType=DECIMAL},
+      </if>
+      <if test="tax != null">
+        tax = #{tax,jdbcType=DECIMAL},
+      </if>
+      <if test="jdprice != null">
+        jdPrice = #{jdprice,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.convention.model.ProductPriceInfo">
+    update product_price_info
+    set sku_id = #{skuId,jdbcType=BIGINT},
+      marketPrice = #{marketprice,jdbcType=DECIMAL},
+      nakedPrice = #{nakedprice,jdbcType=DECIMAL},
+      price = #{price,jdbcType=DECIMAL},
+      taxPrice = #{taxprice,jdbcType=DECIMAL},
+      tax = #{tax,jdbcType=DECIMAL},
+      jdPrice = #{jdprice,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
