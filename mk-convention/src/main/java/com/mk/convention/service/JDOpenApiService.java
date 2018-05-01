@@ -50,6 +50,7 @@ public interface JDOpenApiService {
    JsonResult getSkuSate(String skuIds);
    JsonResult syncCategoryDetail2();
    JsonResult syncCategoryDetail();
+   public JsonResult syncCategoryNew();
    JsonResult syncCategory();
    JsonResult getSellPrice(String skuIds);
 

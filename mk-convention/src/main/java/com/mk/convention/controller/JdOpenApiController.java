@@ -34,6 +34,12 @@ public class JdOpenApiController {
         return jdOpenApiService.getPageNum();
     }
     
+    @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult syncCategoryNew() {
+        return jdOpenApiService.syncCategoryNew();
+    }
+    
     @RequestMapping(value = "/syncCategory",method = RequestMethod.GET)
     @ResponseBody
     public JsonResult syncCategory() {

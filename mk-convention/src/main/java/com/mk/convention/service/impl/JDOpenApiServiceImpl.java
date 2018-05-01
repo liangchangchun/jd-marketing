@@ -13,7 +13,7 @@ import com.mk.convention.utils.JDOpenApiUtils;
 import com.mk.convention.utils.OKHttpClientUtil;
 import com.mk.convention.utils.ServiceCategory;
 import com.stylefeng.guns.core.util.ResponseCode;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
+//import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService{
     private String getAccessToken;
 
     //从京东获取的token 有效期24小时
-    private  final static String ACCESS_TOKEN="uY38L80zpwaspfxQ64LUiQn6S";
+    private  final static String ACCESS_TOKEN="v1wVvMX1KGZxmeepGbTBEZUwC";
 
     //獲取商品所有商品類目信息
     @Value("${jd.openApi.getPageNum}")
@@ -270,6 +270,11 @@ public class JDOpenApiServiceImpl implements JDOpenApiService{
             JsonResult.setResult(result);
         }
         return JsonResult;
+    }
+    @Override
+    public JsonResult syncCategoryNew() {
+        JsonResult pageNums= getPageNum();
+        return pageNums;
     }
     
 
