@@ -73,17 +73,26 @@ public class JsonResult extends LinkedHashMap<String, Object> {
     }
 
     public String getResult() {
+
         return  (String) get(RESULT);
 
     }
-    
-    public JSONArray getResult2() {
-        return  (JSONArray) get(RESULT);
 
+    public Object getResult4() {
+
+        return (Object) get(RESULT);
     }
+
+    public JSONArray getResult2() {
+
+        return (JSONArray) get(RESULT);
+    }
+
+
 
     public JSONObject getResult3() {
         return  (JSONObject) get(RESULT);
 
     }
 }
+

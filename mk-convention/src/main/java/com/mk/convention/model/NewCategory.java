@@ -1,5 +1,5 @@
 package com.mk.convention.model;
 
-public class NewCategory {
+public class NewCategory  {
 
 }

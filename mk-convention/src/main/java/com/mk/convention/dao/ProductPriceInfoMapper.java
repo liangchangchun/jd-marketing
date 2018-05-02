@@ -1,6 +1,8 @@
 package com.mk.convention.dao;
 
 import com.mk.convention.model.ProductPriceInfo;
+import org.springframework.stereotype.Component;
+
 
 public interface ProductPriceInfoMapper {
     int deleteByPrimaryKey(Long id);

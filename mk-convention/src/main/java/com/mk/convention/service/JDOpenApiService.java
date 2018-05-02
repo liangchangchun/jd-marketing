@@ -1,8 +1,10 @@
 package com.mk.convention.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.mk.convention.meta.JsonResult;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public interface JDOpenApiService {
 
@@ -47,11 +49,20 @@ public interface JDOpenApiService {
    
    JsonResult getProductInfo(String skuId);
 
+   /**
+    * 获取商品上下架状态
+    * @Author liukun
+    * @param
+    * @return
+    */
    JsonResult getSkuSate(String skuIds);
    JsonResult syncCategoryDetail2();
    JsonResult syncCategoryDetail();
-   public JsonResult syncCategoryNew();
    JsonResult syncCategory();
+   JSONArray syncCategoryNew();
+   JSONArray syncCategoryNew1();
+   JSONArray syncCategoryNew2();
+   public JSONArray syncCategoryNew3();
    JsonResult getSellPrice(String skuIds);
 
     /**
@@ -71,10 +82,10 @@ public interface JDOpenApiService {
      * @methodName saveAllFirstJdArea
      * @author xiaosq@lovego.com
      * @date 2018/4/28 15:33
-     * @return com.mk.convention.meta.JsonResult
+     * @return java.util.Map<java.lang.String,java.lang.Object>
      * @throws
      */
-    JsonResult getAllFirstJdAreaList();
+    Map<String, Object> getAllFirstJdAreaList();
 
 
     /**
@@ -83,10 +94,10 @@ public interface JDOpenApiService {
      * @methodName getSecondJdAreaList
      * @author xiaosq@lovego.com
      * @date 2018/4/28 15:33
-     * @return com.mk.convention.meta.JsonResult
+     * @return java.util.Map<java.lang.String,java.lang.Object>
      * @throws
      */
-    JsonResult getSecondJdAreaList(int firstAreaId);
+    Map<String, Object> getSecondJdAreaList(long firstAreaId);
 
 
     /**
@@ -95,10 +106,10 @@ public interface JDOpenApiService {
      * @methodName getThirdJdAreaList
      * @author xiaosq@lovego.com
      * @date 2018/4/28 15:33
-     * @return com.mk.convention.meta.JsonResult
+     * @return java.util.Map<java.lang.String,java.lang.Object>
      * @throws
      */
-    JsonResult getThirdJdAreaList(int secondAreaId);
+    Map<String, Object> getThirdJdAreaList(long secondAreaId);
 
     /**
      * 查询所有三级地区下的四级地区
@@ -106,9 +117,16 @@ public interface JDOpenApiService {
      * @methodName getFourthJdAreaList
      * @author xiaosq@lovego.com
      * @date 2018/4/28 15:33
-     * @return com.mk.convention.meta.JsonResult
+     * @return java.util.Map<java.lang.String,java.lang.Object>
      * @throws
      */
-    JsonResult getFourthJdAreaList(int thirdAreaId);
+    Map<String, Object> getFourthJdAreaList(long thirdAreaId);
 
+   /**
+    * 获取分类信息
+    * @Author liukun
+    * @param id (可通过商品详情接口查询)
+    * @return
+    */
+   JsonResult getCategory(Long id);
 }

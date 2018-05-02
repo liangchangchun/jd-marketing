@@ -1,6 +1,7 @@
 package com.mk.convention.controller;
 
 
+import com.alibaba.fastjson.JSONArray;
 import com.mk.convention.meta.JsonResult;
 import com.mk.convention.service.JDOpenApiService;
 import com.stylefeng.guns.core.util.ResponseCode;
@@ -33,17 +34,16 @@ public class JdOpenApiController {
     public JsonResult getPageNum() {
         return jdOpenApiService.getPageNum();
     }
-    
-    @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
-    @ResponseBody
-    public JsonResult syncCategoryNew() {
-        return jdOpenApiService.syncCategoryNew();
-    }
-    
+
     @RequestMapping(value = "/syncCategory",method = RequestMethod.GET)
     @ResponseBody
     public JsonResult syncCategory() {
         return jdOpenApiService.syncCategory();
+    }
+    @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
+    @ResponseBody
+    public JSONArray syncCategoryNew() {
+        return jdOpenApiService.syncCategoryNew3();
     }
     
     @RequestMapping(value = "/syncCategoryDetail",method = RequestMethod.GET)
@@ -100,6 +100,19 @@ public class JdOpenApiController {
         return jsonResult;
     }
 
+    @RequestMapping(value = "/getCategory",method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult getCategory(@RequestParam("cid") Long cid){
+        JsonResult jsonResult;
+        if (cid!=null){
+            jsonResult = jdOpenApiService.getCategory(cid);
+        }else{
+            jsonResult = checkData("分类id不能为空");
+        }
+        return jsonResult;
+    }
+
+
     @RequestMapping(value = "/getSellPrice",method = RequestMethod.POST)
     @ResponseBody
     public JsonResult getSellPrice(@RequestParam(value = "skuIds") String skuIds ){
@@ -120,8 +133,6 @@ public class JdOpenApiController {
     @RequestMapping(value = "/getJDBaseArea",method = RequestMethod.GET)
     @ResponseBody
     public JsonResult getJDBaseArea(){
-        JsonResult jsonResult = null;
-        System.out.println("aaaaa");
-        return jsonResult;
+        return jdOpenApiService.saveAllJdArea();
     }
 }

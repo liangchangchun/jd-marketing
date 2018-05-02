@@ -6,10 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = JdProperties.GUNS_ZWW_DATASOURCE)
+@ConfigurationProperties(prefix = JdProperties.JD_DATASOURCE)
 public class JdProperties {
 
-    public static final String GUNS_ZWW_DATASOURCE = "jd.datasource";
+    public static final String JD_DATASOURCE = "jd.datasource";
 
 
     @Value("${spring.datasource.username}")

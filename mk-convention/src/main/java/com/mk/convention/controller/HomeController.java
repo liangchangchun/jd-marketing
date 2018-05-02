@@ -26,7 +26,7 @@ public class HomeController {
 	    private OrderRepository orderRepository;
 	    /**
 	     * 处理日期类型
-	     * 
+	     *
 	     * @param binder
 	     */
 	    @InitBinder
@@ -35,7 +35,7 @@ public class HomeController {
 	        dateFormat.setLenient(false);
 	        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 	    }
-	    
+
 	    @PostMapping("/save")
 	    @ResponseBody
 	    public  Map<String, Object> save( Order entity) throws Exception {
@@ -45,10 +45,10 @@ public class HomeController {
 	        result.put("id", entity.id);
 	        return result;
 	    }
-	    
+
 	    /**
 	     * 获取对象
-	     * 
+	     *
 	     * @param id
 	     * @return
 	     */
@@ -57,10 +57,10 @@ public class HomeController {
 	    public  Object get(String id) {
 	        return orderRepository.findOne(id);
 	    }
-	    
+
 	    /**
 	     * 获取全部
-	     * 
+	     *
 	     * @return
 	     */
 	    @PostMapping("/findAll")
@@ -71,7 +71,7 @@ public class HomeController {
 
 	    /**
 	     * 删除
-	     * 
+	     *
 	     * @param id
 	     * @return
 	     */
