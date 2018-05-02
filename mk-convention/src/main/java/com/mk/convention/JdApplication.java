@@ -7,12 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 @SpringBootApplication
-public class TestApplication  {
+public class JdApplication  {
 	//日志
-	private static Logger logger = LoggerFactory.getLogger(TestApplication.class);
+	private static Logger logger = LoggerFactory.getLogger(JdApplication.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestApplication.class, args);
+		SpringApplication.run(JdApplication.class, args);
 		logger.info("\r\n\n ================= Mk Convention  Server Boot Successfully ================= \r\n\n");
 	}
 

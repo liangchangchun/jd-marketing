@@ -180,14 +180,6 @@
                 <artifactId>flowable-spring-boot-starter-basic</artifactId>
                 <version>${flowable.version}</version>
             </dependency>
-            <!--guns-->
-            <dependency>
-                <groupId>com.stylefeng</groupId>
-                <artifactId>zww-core</artifactId>
-                <version>${zww.version}</version>
-            </dependency>
-
-            
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatisplus-spring-boot-starter</artifactId>

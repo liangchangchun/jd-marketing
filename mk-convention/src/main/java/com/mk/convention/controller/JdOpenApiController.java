@@ -33,6 +33,24 @@ public class JdOpenApiController {
     public JsonResult getPageNum() {
         return jdOpenApiService.getPageNum();
     }
+    
+    @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult syncCategoryNew() {
+        return jdOpenApiService.syncCategoryNew();
+    }
+    
+    @RequestMapping(value = "/syncCategory",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult syncCategory() {
+        return jdOpenApiService.syncCategory();
+    }
+    
+    @RequestMapping(value = "/syncCategoryDetail",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult syncCategoryDetail() {
+        return jdOpenApiService.syncCategoryDetail2();
+    }
 
     @RequestMapping(value = "/getSkuByPage",method = RequestMethod.POST)
     @ResponseBody
@@ -82,4 +100,28 @@ public class JdOpenApiController {
         return jsonResult;
     }
 
+    @RequestMapping(value = "/getSellPrice",method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult getSellPrice(@RequestParam(value = "skuIds") String skuIds ){
+        JsonResult jsonResult;
+
+        if( null != skuIds &&!skuIds.isEmpty()){
+            if (skuIds.substring(skuIds.length()-1,skuIds.length()).equals(",")){
+                skuIds = skuIds.substring(0,skuIds.length()-1);
+            }
+            jsonResult=jdOpenApiService.getSellPrice(skuIds);
+        }else{
+            jsonResult=checkData("商品编号不能为空！");
+        }
+        return jsonResult;
+    }
+
+
+    @RequestMapping(value = "/getJDBaseArea",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult getJDBaseArea(){
+        JsonResult jsonResult = null;
+        System.out.println("aaaaa");
+        return jsonResult;
+    }
 }

@@ -44,7 +44,71 @@ public interface JDOpenApiService {
     * @return
     */
    JsonResult getDetail(String skuId, HashMap<String,String> data);
+   
+   JsonResult getProductInfo(String skuId);
 
    JsonResult getSkuSate(String skuIds);
+   JsonResult syncCategoryDetail2();
+   JsonResult syncCategoryDetail();
+   public JsonResult syncCategoryNew();
+   JsonResult syncCategory();
+   JsonResult getSellPrice(String skuIds);
+
+    /**
+     * 获取京东所有的地址并入库
+     * @param
+     * @return com.mk.convention.meta.JsonResult
+     * @throws
+     * @methodName saveAllJdArea
+     * @author xiaosq@lovego.com
+     * @date 2018/4/28 15:14
+     */
+    JsonResult saveAllJdArea();
+
+
+    /**
+     * 获取所有一级地区
+     * @methodName saveAllFirstJdArea
+     * @author xiaosq@lovego.com
+     * @date 2018/4/28 15:33
+     * @return com.mk.convention.meta.JsonResult
+     * @throws
+     */
+    JsonResult getAllFirstJdAreaList();
+
+
+    /**
+     * 查询所有一级地区下的二级地区
+     * @param firstAreaId 一级地区ID
+     * @methodName getSecondJdAreaList
+     * @author xiaosq@lovego.com
+     * @date 2018/4/28 15:33
+     * @return com.mk.convention.meta.JsonResult
+     * @throws
+     */
+    JsonResult getSecondJdAreaList(int firstAreaId);
+
+
+    /**
+     * 查询所有二级地区下的三级地区
+     * @param secondAreaId 二级地区ID
+     * @methodName getThirdJdAreaList
+     * @author xiaosq@lovego.com
+     * @date 2018/4/28 15:33
+     * @return com.mk.convention.meta.JsonResult
+     * @throws
+     */
+    JsonResult getThirdJdAreaList(int secondAreaId);
+
+    /**
+     * 查询所有三级地区下的四级地区
+     * @param thirdAreaId 三级地区ID
+     * @methodName getFourthJdAreaList
+     * @author xiaosq@lovego.com
+     * @date 2018/4/28 15:33
+     * @return com.mk.convention.meta.JsonResult
+     * @throws
+     */
+    JsonResult getFourthJdAreaList(int thirdAreaId);
 
 }

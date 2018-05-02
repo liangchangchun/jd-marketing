@@ -2,3 +2,7 @@
 *.project
 .settings
 test-output
+mk-convention.iml
+.idea
+/.idea/
+*.iml
