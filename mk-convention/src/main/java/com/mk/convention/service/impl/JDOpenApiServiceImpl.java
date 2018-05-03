@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Stopwatch;
 import com.mk.convention.dao.ProductPriceInfoMapper;
+import com.mk.convention.jdapi.NewCategoryData;
+import com.mk.convention.jdapi.NewCategoryDataReq;
 import com.mk.convention.config.DataSource;
 import com.mk.convention.meta.JsonResult;
 import com.mk.convention.model.Category;
@@ -22,8 +24,6 @@ import com.mk.convention.utils.JsonUtils;
 import com.mk.convention.utils.OKHttpClientUtil;
 import com.mk.convention.utils.jd.JdDataPublisher;
 import com.mk.convention.utils.jd.JdTransformTool;
-import com.mk.convention.utils.jd.NewCategoryData;
-import com.mk.convention.utils.jd.NewCategoryDataReq;
 import com.mk.convention.utils.traditional.ProductManager;
 import com.stylefeng.guns.core.util.ResponseCode;
 import org.apache.commons.lang3.StringUtils;
@@ -85,7 +85,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
     //从京东获取的token 有效期24小时
     @Value("${jd.AccessToken}")
-    private   String ACCESS_TOKEN;
+    private String ACCESS_TOKEN;
 
     //獲取商品所有商品類目信息
     @Value("${jd.openApi.getPageNum}")
@@ -436,25 +436,45 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
      */
     @Override
     public JSONArray syncCategoryNew3() {
-    	
+    	JSONObject jsonObject = null;
         JsonResult j = getPageNum();
         Stopwatch stopwatchAll =Stopwatch.createStarted();
         JSONArray jsonArray = j.getResult2();
-        long allNum = 0L;
+        //long allNum = 0L;
+        String name = "";
+        String page_num = "";
+       // int skuNum =0;
         try {
-        	 String command = "new_category";
-        	 HashMap<String,String> data = new HashMap();
-             data.put("token",ACCESS_TOKEN);
-             NewCategoryDataReq cateData = new NewCategoryDataReq(getSkuByPage,data,"jd.getSkuByPage");
-             cateData.setParams(jsonArray);//过程数据
-             cateData.setParamColumns(new String[] {"name","page_num"});//过程数据格式
-			JdTransformTool.produce(cateData,dataSource, command,new JdDataPublisher());
-		} catch (InterruptedException e) {
+        	int length = jsonArray.size();
+        for (int i = 0;i < length;i++){
+       // int i= 0;
+        	//stopwatch =Stopwatch.createStarted();
+             jsonObject = jsonArray.getJSONObject(i);
+             name = jsonObject.getString("name");
+             page_num = jsonObject.getString("page_num");
+             //skuNum = syncCategoryPage2(page_num);//skuId数量
+        	// String command = "JDBC_SAVE";
+        	 HashMap<String,String> paramData = new HashMap();//请求接口参数
+        	 paramData.put("token",ACCESS_TOKEN);
+        	 paramData.put("pageNum", page_num);
+        	 paramData.put("name", name);
+             NewCategoryDataReq cateData = new NewCategoryDataReq();//请求接口
+             cateData.setMethod(getSkuByPage);//
+             cateData.setData(paramData);
+             cateData.setLogTag("jd.getSkuByPage");
+             cateData.setTableName("new_category");
+			JdTransformTool.produce(cateData,dataSource,JdTransformTool.JdDataEventType.JDBC_SAVE, new JdDataPublisher());
+            //allNum += skuNum;
+           // long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+            // System.out.println("商品池请求编号:【"+page_num+"】,第"+i+"个商品名称:" + name+" 数量:"+skuNum+"程序运行时间: "+nanos+"ns");
+        	}
+    	} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
         long nanosAll = stopwatchAll.elapsed(TimeUnit.NANOSECONDS);
         long nanosAlls = stopwatchAll.elapsed(TimeUnit.SECONDS);
-        System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size()+",数量:"+allNum+"个skuId");
+        System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size());
         return jsonArray;
     }
     /**
@@ -512,7 +532,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     	long nanos = 0L;
     	JSONObject skuIdsObj = null;
     	NewCategoryData data = null;
-    	String command = "new_category";
+    	String command = "JDBC";
 			for (int index = 1; index<=pageCount; index++) {
 				stopwatch =Stopwatch.createStarted();
 				 skuIdsRes  = getSkuByPage(page_num,index);
