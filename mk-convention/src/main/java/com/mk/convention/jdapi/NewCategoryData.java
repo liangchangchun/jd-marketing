@@ -7,6 +7,7 @@ import com.mk.convention.utils.jd.BaseDataEvent;
 import com.mk.convention.utils.jd.DataEvent;
 import com.mk.convention.utils.jd.JdDataEvent;
 import com.mk.convention.utils.jd.JdDataEventTranslator;
+import com.mk.convention.utils.jd.JdbcSqlAdapter;
 /**
  * BaseDataEvent 请求 和 传递参数封装
  * @author lcc
@@ -33,7 +34,7 @@ public class NewCategoryData extends BaseDataEvent implements DataEvent,java.io.
 	}
 	
 	@Override
-	public String adapterSql(JdDataEvent jdDataEvent) {
+	public JdbcSqlAdapter adapterSql(JdDataEvent jdDataEvent) {
 		NewCategoryData dataEvent = (NewCategoryData)jdDataEvent.getEvent();
 		JSONArray skuids = dataEvent.getSkuIds();
         if(skuids==null){
@@ -49,7 +50,10 @@ public class NewCategoryData extends BaseDataEvent implements DataEvent,java.io.
         sqls = sqls.substring(0, sqls.length()-1);
         //String tableName = dataEvent.getTableName();
         String buildSql = "insert into "+this.getTableName()+"(sku_id,category_id) values "+sqls;
-		return buildSql;
+        JdbcSqlAdapter sqla = new JdbcSqlAdapter();
+        sqla.setSql(buildSql);
+        sqla.setParameters(null);
+		return sqla;
 	}
 	
 	@Override

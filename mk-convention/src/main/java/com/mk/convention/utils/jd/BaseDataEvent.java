@@ -31,7 +31,7 @@ public abstract class BaseDataEvent {
 	 * 适配sql语句  消费者
 	 * @return
 	 */
-	public abstract String adapterSql(JdDataEvent jdDataEvent);
+	public abstract JdbcSqlAdapter adapterSql(JdDataEvent jdDataEvent);
 	/**
 	 * api请求  数据提供者
 	 * @param jdDataEvent

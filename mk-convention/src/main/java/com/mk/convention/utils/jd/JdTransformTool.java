@@ -11,6 +11,8 @@ import com.mk.convention.utils.SpringUtil;
 import com.mk.convention.utils.disruptor.MyEventProduce;
 
 public class JdTransformTool {
+	public static DataSource dataSource;
+
 	/**
 	 * 表数据类型
 	 * @author lovegp
@@ -22,9 +24,10 @@ public class JdTransformTool {
 			return super.toString().toLowerCase() ;
 		}
 	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void published(JdDataEvent jdDataEvent){
-		published(jdDataEvent.getEvent(), jdDataEvent.getDataSource() ,jdDataEvent.getCommand());
+		published(jdDataEvent.getEvent(), dataSource ,jdDataEvent.getCommand());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -72,5 +75,15 @@ public class JdTransformTool {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void produce(DataEvent event, DataSource dataSource ,JdDataEventType commandType,BasePublisher publisher) throws InterruptedException{
 		produce(event, dataSource , commandType.toString(), publisher);
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void produce(DataEvent event, DataSource dataSource ,JdDataEventType commandType) throws InterruptedException{
+		produce(event, dataSource , commandType.toString(), new JdDataPublisher());
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void produce(DataEvent event ,JdDataEventType commandType) throws InterruptedException{
+		produce(event, dataSource , commandType.toString(), new JdDataPublisher());
 	}
 }

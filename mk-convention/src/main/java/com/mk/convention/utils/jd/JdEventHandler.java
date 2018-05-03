@@ -33,9 +33,9 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
 	 */
 	private void jdbcSave(JdDataEvent jdDataEvent) {
 		BaseDataEvent baseDataEvent = (BaseDataEvent)jdDataEvent.getEvent();
-        String abSql = baseDataEvent.adapterSql(jdDataEvent);
-        if (abSql!=null) {
-        	jdDataEvent.getDataSource().executeUpdate(abSql, null);
+		JdbcSqlAdapter sqla = baseDataEvent.adapterSql(jdDataEvent);
+        if (sqla!=null && sqla.getSql()!=null) {
+        	jdDataEvent.getDataSource().executeUpdate(sqla.getSql(), sqla.getParameters());
         }
 	}
 }

@@ -9,6 +9,7 @@ import com.mk.convention.config.property.JDApiConfig;
 import com.mk.convention.service.HttpService;
 import com.mk.convention.utils.SpringUtil;
 import com.mk.convention.utils.jd.JDHttpTool;
+import com.mk.convention.utils.jd.JdTransformTool;
 
 @Component
 public class StartedEventListener implements ApplicationListener<ContextRefreshedEvent>{
@@ -23,6 +24,7 @@ public class StartedEventListener implements ApplicationListener<ContextRefreshe
     	}
 		JDHttpTool.getInstance().setConfig(jDApiConfig);//初始化京东请求工具
 		JDHttpTool.getInstance().setCommonHttpService(commonHttpService);
+		JdTransformTool.dataSource = new DataSource();
 	}
 	
 }

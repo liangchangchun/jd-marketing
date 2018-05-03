@@ -454,7 +454,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
              page_num = jsonObject.getString("page_num");
              //skuNum = syncCategoryPage2(page_num);//skuId数量
         	// String command = "JDBC_SAVE";
-        	 HashMap<String,String> paramData = new HashMap();//请求接口参数
+        	 HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
         	 paramData.put("token",ACCESS_TOKEN);
         	 paramData.put("pageNum", page_num);
         	 paramData.put("name", name);
@@ -463,7 +463,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
              cateData.setData(paramData);
              cateData.setLogTag("jd.getSkuByPage");
              cateData.setTableName("new_category");
-			JdTransformTool.produce(cateData,dataSource,JdTransformTool.JdDataEventType.JDBC_SAVE, new JdDataPublisher());
+			JdTransformTool.produce(cateData,JdTransformTool.JdDataEventType.JDBC_SAVE);
             //allNum += skuNum;
            // long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
             // System.out.println("商品池请求编号:【"+page_num+"】,第"+i+"个商品名称:" + name+" 数量:"+skuNum+"程序运行时间: "+nanos+"ns");
@@ -477,147 +477,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size());
         return jsonArray;
     }
-    /**
-     * Disruptor 并发 消费者 
-     */
-    @Override
-    public JSONArray syncCategoryNew2() {
-    	
-    	Stopwatch stopwatch = null;
-    	JSONObject jsonObject = null;
-        JsonResult j = getPageNum();
-        Stopwatch stopwatchAll =Stopwatch.createStarted();
-        JSONArray jsonArray = j.getResult2();
-        long allNum = 0L;
-        String name = "";
-        String page_num = "";
-        int skuNum =0;
-        for (int i = 0,length =  jsonArray.size();i < length;i++){
-       // int i= 0;
-        	stopwatch =Stopwatch.createStarted();
-             jsonObject = jsonArray.getJSONObject(i);
-             name = jsonObject.getString("name");
-             page_num = jsonObject.getString("page_num");
-             skuNum = syncCategoryPage2(page_num);//skuId数量
-            allNum += skuNum;
-            long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-            System.out.println("商品池请求编号:【"+page_num+"】,第"+i+"个商品名称:" + name+" 数量:"+skuNum+"程序运行时间: "+nanos+"ns");
-        }
-        long nanosAll = stopwatchAll.elapsed(TimeUnit.NANOSECONDS);
-        long nanosAlls = stopwatchAll.elapsed(TimeUnit.SECONDS);
-        System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size()+",数量:"+allNum+"个skuId");
-        return jsonArray;
-    }
-    
-    public int syncCategoryPage2(String page_num) {
-    	int skus = 0;
-    	int page = 1;
-    	JSONArray skuIds = null;
-    	Stopwatch stopwatch = null;
-    	//stopwatch =Stopwatch.createStarted();
-    	JsonResult skuIdsResFirst  = getSkuByPage(page_num,page);
-    	//long nanosfirst = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-    	if (skuIdsResFirst.get("result")==null) {
-    		System.out.println("=====商品池编号:"+page_num+"为空");
-    		return 0;
-    	}
-    	JSONObject skuIdsObjFirst =(JSONObject)skuIdsResFirst.get("result");
-    	int pageCount = (int) skuIdsObjFirst.get("pageCount");
-    	//skuIds = (JSONArray) skuIdsObjFirst.get("skuIds");
-    	//skus += skuIds.size();
-    	System.out.println("########pageCount:"+pageCount);
-		//System.out.println("=====第"+page+"页skuId数量"+skuIds.size()+"个,pageCount:"+pageCount+",程序运行时间: "+nanosfirst+"ns");
-		//if (pageCount>0) {
-    	JsonResult skuIdsRes  = null;
-    	long nanos = 0L;
-    	JSONObject skuIdsObj = null;
-    	NewCategoryData data = null;
-    	String command = "JDBC";
-			for (int index = 1; index<=pageCount; index++) {
-				stopwatch =Stopwatch.createStarted();
-				 skuIdsRes  = getSkuByPage(page_num,index);
-				 nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-				 skuIdsObj =(JSONObject)skuIdsRes.get("result");
-				 if (skuIdsObj==null) {
-					 continue;
-				 }
-				skuIds = (JSONArray) skuIdsObj.get("skuIds");
-				 if (skuIds==null) {
-					 continue;
-				 }
-				
-				data = new NewCategoryData();
-				data.setSkuIds(skuIds);
-				data.setCategoryId(page_num);
-				JdTransformTool.published(data,dataSource, command);
-				System.out.println("########skuIds:"+skuIds);
-				System.out.println("=====第"+index+"页skuId数量"+skuIds.size()+"个,pageCount:"+pageCount+"程序运行时间: "+nanos+"ns");
-				skus += skuIds.size();
-    		}
-		//}
-    	return skus;
-    }
-    
-    private volatile int skuNum = 0;
-    private volatile long allNum = 0L;
-    /**
-     * 线程池  消息提供者
-     */
-    @Override
-    public JSONArray syncCategoryNew1() {
-	   ExecutorService executor= Executors.newFixedThreadPool(4);
-    	JSONObject jsonObject = null;
-        JsonResult j = getPageNum();
-        Stopwatch stopwatchAll =Stopwatch.createStarted();
-        JSONArray jsonArray = j.getResult2();
-       // String page_num = "";
-        //int skuNum =0;
-        //线程池
-       final int size = jsonArray.size();
-        CountDownLatch countDown = new CountDownLatch(4);
-        for (int i = 0,length =  jsonArray.size();i < length;i++){
-            // int i= 0;
-             	final int s = i;
-                  jsonObject = jsonArray.getJSONObject(i);
-               // final String name = jsonObject.getString("name");
-                  if(jsonObject==null) {
-                 	 continue;
-                  }
-                 final String page_num = jsonObject.getString("page_num");
-                 ProductManager.getInstance(size).setNum(page_num);
-             }
-             executor.execute(new Runnable() {
-     			@Override
-     			public void run() {
-     				try {
-     					while (true) {
-     					Stopwatch stopwatch =Stopwatch.createStarted();
-         				String page_num =ProductManager.getInstance(size).getNum();
-         					if (page_num!=null) {
-         						skuNum = syncCategoryPage(page_num);//skuId数量
-         						allNum += skuNum;
-         						long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-         						System.out.println("商品池请求编号:【"+page_num+"】 数量:"+skuNum+"程序运行时间: "+nanos+"ns");
-							} else {
-								countDown.countDown();
-							}
-     					}
-     				} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-     			}
-             	
-             });
-             try {
-				countDown.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-        long nanosAll = stopwatchAll.elapsed(TimeUnit.NANOSECONDS);
-        long nanosAlls = stopwatchAll.elapsed(TimeUnit.SECONDS);
-        System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size()+",数量:"+allNum+"个skuId");
-        return jsonArray;
-    }
+   
     /**
      * 直接获取 数据  单线程模式
      * @param page_num
