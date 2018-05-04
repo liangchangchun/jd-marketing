@@ -8,6 +8,7 @@ import com.google.common.base.Stopwatch;
 import com.mk.convention.dao.ProductPriceInfoMapper;
 import com.mk.convention.jdapi.NewCategoryData;
 import com.mk.convention.jdapi.NewCategoryDataReq;
+import com.mk.convention.jdapi.ProductDetailData;
 import com.mk.convention.config.DataSource;
 import com.mk.convention.meta.JsonResult;
 import com.mk.convention.model.Category;
@@ -35,8 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -120,6 +122,13 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Value("${jd.openApi.getTown}")
     private String getTown ;
 
+    @Value("${jd.openApi.getRefreshToken}")
+    private String getRefreshToken;
+
+    @Value("${jd.refreshToken}")
+    private String refreshToken;
+
+
     @Autowired
     private JDBaseAreaRepository jdBaseAreaRepository;
     //获取商品分类信息
@@ -128,6 +137,8 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
     @Autowired
     private HttpService commonHttpService;
+
+    @PostConstruct public void init(){this.getRefreShToken();}
 
     @Override
     public JsonResult getAccessToken() {
@@ -164,6 +175,40 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         data.put("sku",skuId);
         return packageParams(getDetail,data,"jd.getDetail");
     }
+    /**
+     * 拉取商品详情
+     * @throws InterruptedException 
+     */
+	@Override
+	public JsonResult syncCategoryDetail2() throws InterruptedException {
+		 HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
+		 ProductDetailData cateData = null;
+		 ArrayList results = this.dataSource.executeQuery("select count(*) cnt from new_category", null);
+		 Object[] obj = (Object[]) results.get(0);
+		 Integer count = obj[0]==null? 0 : Integer.parseInt(String.valueOf(obj[0]));
+		 int index = 500;
+		 int page = 0;
+		 int pageCount = count/index;
+		 if (count%index>0) {
+			 pageCount++; 
+		 }
+		 for (int i=0;i<pageCount;i++) {//数据查询一页作为一次任务  
+			 	paramData.put("token",ACCESS_TOKEN);
+    	 		paramData.put("index",String.valueOf(index));
+    	 		paramData.put("pageNum",String.valueOf(i*index));
+    	 
+    	 	cateData = new ProductDetailData();//请求接口
+         	cateData.setMethod(getDetail);//获取商品详情接口
+         	cateData.setData(paramData);
+         	cateData.setLogTag("jd.getSkuByPage");
+         	JdTransformTool.produce(cateData,JdTransformTool.JdDataEventType.JDBC_SAVE);
+		 }
+		JsonResult result = new JsonResult();
+		result.setCode(200);
+		result.setMessage("拉取数据保存完成");
+		return result;
+	}
+
 
     @Override
     public JsonResult getSkuSate(String skuIds) {
@@ -188,6 +233,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         for (Category category : list) {
             for (int i= 1;; i++) {
                 JsonResult skuByPage = this.getSkuByPage(category.getPage_num(), i);
+
                 Object result2 = skuByPage.getResult4();
                 if (result2==null){
                     break;
@@ -206,6 +252,9 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
                         data.put("sku",skuids.substring(0,skuids.length()-1));
                         data.put("queryExts","containsTax,marketPrice");
                         JsonResult jsonResult = packageParams(getSellPrice, data, "jd.getSellPrice");
+                        if(skuByPage.getCode().equals("500")){
+                            jsonResult = RefreShAccessToken(getSellPrice,data);
+                        }
                         Object result1 = jsonResult.getResult4();
                         if (result1==null){
                           continue;
@@ -300,24 +349,19 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         }
 
         String url = jdOpenApiHost + method;
-//        System.out.println("京东API请求："+url);
         try {
             long t1 = System.currentTimeMillis();
 
             // 调用京东open api
             String response = commonHttpService.doPost(url, params, "utf-8");
-//            OKHttpClientUtil.httpPost(url, paramsMap);
-
-//            logger.info(""+response+"");
             long t2 = System.currentTimeMillis();
 
-//            logger.info("{} method={}, params={}, response={}, 耗时={}",
-//                    logTag, JSON.toJSONString(params), response, t2 - t1);
-
+              JsonResult jsonResult = handleResponse(response);
+            if(jsonResult.getCode().equals("500")){
+                return RefreShAccessToken(method,data);
+            }
             return handleResponse(response);
         } catch (Exception e) {
-//            logger.error("{} Exception={}, method={}, params={}",
-//                    logTag, e.getMessage(), JSON.toJSONString(params));
             return initServerError("server error");
         }
     }
@@ -792,15 +836,52 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 	        return null;
 	}
 
-	@Override
-	public JsonResult syncCategoryDetail2() {
-		return null;
-	}
 
 	@Override
 	public JsonResult syncCategoryDetail() {
 		return null;
 	}
 
+    /**
+     * 刷新京东token值
+     * @Author liukun
+     * @param
+     * @return
+     */
+    @Override
+    public JsonResult getRefreshToken(){
+        HashMap<String,String> data = new HashMap();
+        data.put("refresh_token",refreshToken);
+        data.put("client_id",clientId);
+        data.put("client_secret",clientSecret);
+        return packageParams(getRefreshToken,data,"jd.getRefreshToken");
+    }
+    @Override
+    public JsonResult RefreShAccessToken(String method, HashMap<String, String> data) {
+        JsonResult jsonResult = getRefreshToken();
+        Map map = (Map) JsonUtils.fromJson(JsonUtils.toJson(jsonResult), Map.class);
+        String RefreShAccessToken = new String();
+        if ((Integer) map.get("code") == 200) {
+            Map resultMap = (Map) JsonUtils.fromJson(JsonUtils.toJson(map.get("result")), Map.class);
+            if (StringUtils.isNotBlank((String) resultMap.get("access_token"))) {
+                RefreShAccessToken = (String) resultMap.get("access_token");
+                data.remove("token");
+                data.put("token", RefreShAccessToken);
+            }
+        }
+
+        return packageParams(method, data, method);
+    }
+
+    private void getRefreShToken(){
+        JsonResult jsonResult = getRefreshToken();
+        Map map = (Map) JsonUtils.fromJson(JsonUtils.toJson(jsonResult), Map.class);
+        if ((Integer) map.get("code") == 200) {
+            Map resultMap = (Map) JsonUtils.fromJson(JsonUtils.toJson(map.get("result")), Map.class);
+            if (StringUtils.isNotBlank((String) resultMap.get("access_token"))) {
+                ACCESS_TOKEN = (String) resultMap.get("access_token");
+            }
+        }
+    }
 
 }

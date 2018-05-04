@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 public class MarketingGoodsTest {
 
 public static void main(String[] args) {
+	
 BigDecimal decimal = new BigDecimal("1.12345");
         System.out.println(decimal);
         BigDecimal setScale = decimal.setScale(4,BigDecimal.ROUND_HALF_DOWN);

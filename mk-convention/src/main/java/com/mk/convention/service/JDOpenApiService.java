@@ -56,7 +56,7 @@ public interface JDOpenApiService {
     * @return
     */
    JsonResult getSkuSate(String skuIds);
-   JsonResult syncCategoryDetail2();
+   JsonResult syncCategoryDetail2() throws InterruptedException;
    JsonResult syncCategoryDetail();
    JsonResult syncCategory();
    JSONArray syncCategoryNew();
@@ -127,4 +127,8 @@ public interface JDOpenApiService {
     * @return
     */
    JsonResult getCategory(Long id);
+
+   JsonResult getRefreshToken();
+
+   JsonResult RefreShAccessToken(String method, HashMap<String, String> data);
 }

@@ -40,15 +40,23 @@ public class JdOpenApiController {
     public JsonResult syncCategory() {
         return jdOpenApiService.syncCategory();
     }
+    /**
+     * 批量拉取skuId 并保存skuIds 列表
+     * @return
+     */
     @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
     @ResponseBody
     public JSONArray syncCategoryNew() {
         return jdOpenApiService.syncCategoryNew3();
     }
-    
+    /**
+     * 根据数据库skuIds 拉取商品详情 并保存
+     * @return
+     * @throws InterruptedException 
+     */
     @RequestMapping(value = "/syncCategoryDetail",method = RequestMethod.GET)
     @ResponseBody
-    public JsonResult syncCategoryDetail() {
+    public JsonResult syncCategoryDetail() throws InterruptedException {
         return jdOpenApiService.syncCategoryDetail2();
     }
 
