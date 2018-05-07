@@ -24,6 +24,8 @@
 		 <thymeleaf.version> 3.0.2.RELEASE </thymeleaf.version>  
     	<thymeleaf-layout-dialect.version> 2.1.1 </thymeleaf-layout-dialect.version> 
     	<xmlFileName>testng.xml</xmlFileName>
+    	<spring-data-elasticsearch.version>3.1.0.BUILD-SNAPSHOT</spring-data-elasticsearch.version>
+    	 <elasticsearch>6.2.4</elasticsearch>
 	</properties>
 	
 	<dependencies>
@@ -36,16 +38,32 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+            <!-- SPRING DATA -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+                <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!--  -->
 		<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
-		  <groupId>org.springframework.data</groupId>
-		  <artifactId>spring-data-elasticsearch</artifactId>
+		  	<groupId>org.springframework.data</groupId>
+		  	<artifactId>spring-data-elasticsearch</artifactId>
+			<version>${spring-data-elasticsearch.version}</version>
 		</dependency>
-        
 		<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -72,10 +90,6 @@
             <optional>true</optional>
         </dependency>
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-config-server</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
@@ -93,12 +107,14 @@
     		<groupId>commons-lang</groupId>
     		<artifactId>commons-lang</artifactId>
 		</dependency>
+		<!-- 
 		<dependency>
    			 <groupId>io.netty</groupId>
     		<artifactId>netty</artifactId>
     		<version>3.10.5.Final</version>
 		</dependency>
-		<!--   -->
+		  -->
+	
 		  <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -107,12 +123,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-      
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-        </dependency>
-        
        <dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>
@@ -130,6 +140,31 @@
     		<groupId>junit</groupId>
     		<artifactId>junit</artifactId>
     	</dependency>
+    	 <!-- Elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch}</version>
+        </dependency>
+      
+            <dependency>
+      <!-- required by elasticsearch -->
+            <groupId>org.elasticsearch.plugin</groupId>
+            <artifactId>transport-netty4-client</artifactId>
+            <version>${elasticsearch}</version>
+            <!--<scope>test</scope>-->
+        </dependency>
+          <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>${elasticsearch}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- 依赖testNg 
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -212,6 +247,5 @@
 		-->
 		</plugins>
 	</build>
-
-
+  
 </project>

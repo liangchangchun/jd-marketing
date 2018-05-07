@@ -5,10 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
-
+@EnableSearch
 @SpringBootApplication
 @ComponentScan(basePackages={"com.mk"})
+@EnableElasticsearchRepositories("com.mk.convention.respository.es")
 public class JdApplication  {
 	//日志
 	private static Logger logger = LoggerFactory.getLogger(JdApplication.class);

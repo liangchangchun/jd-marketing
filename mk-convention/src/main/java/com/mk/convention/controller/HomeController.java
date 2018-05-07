@@ -55,7 +55,7 @@ public class HomeController {
 	    @PostMapping("/get")
 	    @ResponseBody
 	    public  Object get(String id) {
-	        return orderRepository.findOne(id);
+	        return orderRepository.getOne(id);
 	    }
 
 	    /**
@@ -79,7 +79,7 @@ public class HomeController {
 	    @ResponseBody
 	    public  Map<String, Object> delete(String id) {
 	        Map<String, Object> result = new HashMap<>();
-	        orderRepository.delete(id);
+	        orderRepository.deleteById(id);
 	        result.put("id", id);
 	        return result;
 	    }

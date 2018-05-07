@@ -25,7 +25,13 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
 		}*/
 		if (JdTransformTool.JdDataEventType.JDBC_SAVE.toString().equals(jdDataEvent.getCommand())) {
 			jdbcSave(jdDataEvent);
+		} else if (JdTransformTool.JdDataEventType.ES_SAVE.toString().equals(jdDataEvent.getCommand()))  {
+			esSave(jdDataEvent);
 		}
+	}
+	private void esSave(JdDataEvent jdDataEvent) {
+		BaseDataEvent baseDataEvent = (BaseDataEvent)jdDataEvent.getEvent();
+		jdDataEvent.getEsRes().save(baseDataEvent);
 	}
 	/**
 	 * jdbc insert
@@ -38,4 +44,6 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
         	jdDataEvent.getDataSource().executeUpdate(sqla.getSql(), sqla.getParameters());
         }
 	}
+	
+	
 }

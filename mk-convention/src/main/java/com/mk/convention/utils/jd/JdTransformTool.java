@@ -19,7 +19,7 @@ public class JdTransformTool {
 	 *
 	 */
 	public enum JdDataEventType{
-		JDBC_SAVE;
+		JDBC_SAVE,ES_SAVE;
 		public String toString(){
 			return super.toString().toLowerCase() ;
 		}

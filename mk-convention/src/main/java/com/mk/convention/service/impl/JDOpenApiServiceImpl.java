@@ -275,8 +275,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
                     }
                 }
             }
-            productPriceInfoRepository.save(productPriceInfos);
-
+            productPriceInfoRepository.saveAll(productPriceInfos);
             System.out.println(productPriceInfos.size());
             productPriceInfos.clear();
 

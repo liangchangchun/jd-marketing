@@ -6,3 +6,6 @@ mk-convention.iml
 .idea
 /.idea/
 *.iml
+/mk-convention/data/elasticsearch/nodes/0/_state/*.st
+*.lock
+*.st
