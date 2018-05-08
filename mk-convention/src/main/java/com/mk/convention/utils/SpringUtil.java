@@ -8,7 +8,7 @@ public class SpringUtil {
 	    // 若非同包或子包，则需手动import 注入，有没有@Component都一样
 	    // 可复制到Test同包测试
 
-	    public static void setApplicationContext(ApplicationContext applicationContext) {
+	    public static void setContext(ApplicationContext applicationContext) {
 	        if(SpringUtil.applicationContext == null){
 	            SpringUtil.applicationContext  = applicationContext;
 	        }
@@ -16,23 +16,23 @@ public class SpringUtil {
 	    }
 
 	    //获取applicationContext
-	    public static ApplicationContext getApplicationContext() {
+	    public static ApplicationContext getContext() {
 	        return applicationContext;
 	    }
 
 	    //通过name获取 Bean.
 	    public static Object getBean(String name){
-	        return getApplicationContext().getBean(name);
+	        return getContext().getBean(name);
 
 	    }
 
 	    //通过class获取Bean.
 	    public static <T> T getBean(Class<T> clazz){
-	        return getApplicationContext().getBean(clazz);
+	        return getContext().getBean(clazz);
 	    }
 
 	    //通过name,以及Clazz返回指定的Bean
 	    public static <T> T getBean(String name,Class<T> clazz){
-	        return getApplicationContext().getBean(name, clazz);
+	        return getContext().getBean(name, clazz);
 	    }
 }

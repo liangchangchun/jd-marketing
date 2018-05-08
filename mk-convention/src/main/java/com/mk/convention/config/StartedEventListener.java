@@ -19,8 +19,8 @@ public class StartedEventListener implements ApplicationListener<ContextRefreshe
     HttpService  commonHttpService;
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if(SpringUtil.getApplicationContext() == null){//注入上下文对象
-			SpringUtil.setApplicationContext(event.getApplicationContext());
+		if(SpringUtil.getContext() == null){//注入上下文对象
+			SpringUtil.setContext(event.getApplicationContext());
     	}
 		JDHttpTool.getInstance().setConfig(jDApiConfig);//初始化京东请求工具
 		JDHttpTool.getInstance().setCommonHttpService(commonHttpService);

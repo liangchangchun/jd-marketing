@@ -3,7 +3,8 @@ package com.mk.convention.respository.es;
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-import com.mk.convention.entity.ItemDocument;
+import com.mk.convention.model.entity.ItemDocument;
+
 
 /**
  * https://docs.spring.io/spring-data/elasticsearch/docs/current/reference/html/

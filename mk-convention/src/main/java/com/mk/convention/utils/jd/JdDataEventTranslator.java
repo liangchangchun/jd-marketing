@@ -12,7 +12,7 @@ public class JdDataEventTranslator implements EventTranslator<JdDataEvent>{
 	private JdDataEvent generateData(JdDataEvent jdDataEvent){
 		//填充数据 
 		JdTransformTool.published(jdDataEvent);//保存
-		System.out.println("Thread Id " + Thread.currentThread().getId() + " 写完一个event");
+		//System.out.println("Thread Id " + Thread.currentThread().getId() + " 写完一个event");
 		return jdDataEvent;
 	}
 }

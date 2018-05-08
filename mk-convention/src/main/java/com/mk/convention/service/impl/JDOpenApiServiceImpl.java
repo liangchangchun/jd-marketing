@@ -16,6 +16,7 @@ import com.mk.convention.model.ProductPriceInfo;
 import com.mk.convention.model.SkuByPage;
 import com.mk.convention.respository.OrderRepository;
 import com.mk.convention.respository.ProductPriceInfoRepository;
+import com.mk.convention.respository.es.ProductDetailRepository;
 import com.mk.convention.persistence.model.JDBaseArea;
 import com.mk.convention.respository.JDBaseAreaRepository;
 import com.mk.convention.service.HttpService;
@@ -25,6 +26,7 @@ import com.mk.convention.utils.JsonUtils;
 import com.mk.convention.utils.OKHttpClientUtil;
 import com.mk.convention.utils.jd.JdDataPublisher;
 import com.mk.convention.utils.jd.JdTransformTool;
+import com.mk.convention.utils.jd.JdTransformTool.JdDataEventType;
 import com.mk.convention.utils.traditional.ProductManager;
 import com.stylefeng.guns.core.util.ResponseCode;
 import org.apache.commons.lang3.StringUtils;
@@ -131,6 +133,8 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
     @Autowired
     private JDBaseAreaRepository jdBaseAreaRepository;
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
     //获取商品分类信息
     @Value("${jd.openApi.getCategory}")
     private String getCategory;
@@ -201,7 +205,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
          	cateData.setMethod(getDetail);//获取商品详情接口
          	cateData.setData(paramData);
          	cateData.setLogTag("jd.getSkuByPage");
-         	JdTransformTool.produce(cateData,JdTransformTool.JdDataEventType.JDBC_SAVE);
+         	JdTransformTool.produce(cateData,productDetailRepository);
 		 }
 		JsonResult result = new JsonResult();
 		result.setCode(200);
@@ -506,7 +510,8 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
              cateData.setData(paramData);
              cateData.setLogTag("jd.getSkuByPage");
              cateData.setTableName("new_category");
-			JdTransformTool.produce(cateData,JdTransformTool.JdDataEventType.JDBC_SAVE);
+           //默认数据发布保存到数据库
+			JdTransformTool.produce(cateData);
             //allNum += skuNum;
            // long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
             // System.out.println("商品池请求编号:【"+page_num+"】,第"+i+"个商品名称:" + name+" 数量:"+skuNum+"程序运行时间: "+nanos+"ns");

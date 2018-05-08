@@ -29,9 +29,12 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
 			esSave(jdDataEvent);
 		}
 	}
+	/**
+	 * 索引存储
+	 * @param jdDataEvent
+	 */
 	private void esSave(JdDataEvent jdDataEvent) {
-		BaseDataEvent baseDataEvent = (BaseDataEvent)jdDataEvent.getEvent();
-		jdDataEvent.getEsRes().save(baseDataEvent);
+		jdDataEvent.getEsRes().save(jdDataEvent.getEvent());
 	}
 	/**
 	 * jdbc insert

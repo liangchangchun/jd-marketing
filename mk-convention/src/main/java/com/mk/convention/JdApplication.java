@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
+//注入es 库
 @EnableSearch
 @SpringBootApplication
 @ComponentScan(basePackages={"com.mk"})
-@EnableElasticsearchRepositories("com.mk.convention.respository.es")
 public class JdApplication  {
 	//日志
 	private static Logger logger = LoggerFactory.getLogger(JdApplication.class);

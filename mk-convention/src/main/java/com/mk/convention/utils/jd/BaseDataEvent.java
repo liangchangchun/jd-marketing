@@ -32,11 +32,12 @@ public abstract class BaseDataEvent {
 	 * @return
 	 */
 	public JdbcSqlAdapter adapterSql(JdDataEvent jdDataEvent) {
+		System.out.println("需要实现adapterSql方法");
 		return null;
 	};
 	
 	public void saveEs(JdDataEvent jdDataEvent) {
-		
+		System.out.println("未重写saveEs方法");
 	};
 	/**
 	 * api请求  数据提供者

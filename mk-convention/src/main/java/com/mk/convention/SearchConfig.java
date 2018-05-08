@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by lijingyao on 2018/1/19 21:00.
+ * Created by lcc on 2018/5/8.
  */
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.lijingyao.es")
+@EnableElasticsearchRepositories(basePackages = "com.mk.convention.respository.es")
 public class SearchConfig {
 
 
