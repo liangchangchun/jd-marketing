@@ -34,7 +34,12 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
 	 * @param jdDataEvent
 	 */
 	private void esSave(JdDataEvent jdDataEvent) {
-		jdDataEvent.getEsRes().save(jdDataEvent.getEvent());
+		if (jdDataEvent.getEvent() instanceof BaseDataEvent) {
+			BaseDataEvent baseDataEvent = (BaseDataEvent)jdDataEvent.getEvent();
+			baseDataEvent.adapterEs(jdDataEvent);
+		} else {
+			jdDataEvent.getEsRes().save(jdDataEvent.getEvent());
+		}
 	}
 	/**
 	 * jdbc insert

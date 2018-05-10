@@ -35,9 +35,13 @@ public abstract class BaseDataEvent {
 		System.out.println("需要实现adapterSql方法");
 		return null;
 	};
-	
-	public void saveEs(JdDataEvent jdDataEvent) {
-		System.out.println("未重写saveEs方法");
+	/**
+	 * 默认直接存储索引内容
+	 * @param jdDataEvent
+	 */
+	public void adapterEs(JdDataEvent jdDataEvent) {
+		//System.out.println("未重写saveEs方法");
+		jdDataEvent.getEsRes().save(jdDataEvent.getEvent());
 	};
 	/**
 	 * api请求  数据提供者

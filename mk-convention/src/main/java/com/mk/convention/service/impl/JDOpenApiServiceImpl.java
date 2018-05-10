@@ -6,24 +6,26 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Stopwatch;
 import com.mk.convention.dao.ProductPriceInfoMapper;
-import com.mk.convention.jdapi.NewCategoryData;
-import com.mk.convention.jdapi.NewCategoryDataReq;
-import com.mk.convention.jdapi.ProductDetailData;
+import com.mk.convention.jdapi.*;
 import com.mk.convention.config.DataSource;
 import com.mk.convention.meta.JsonResult;
 import com.mk.convention.model.Category;
 import com.mk.convention.model.ProductPriceInfo;
 import com.mk.convention.model.SkuByPage;
+import com.mk.convention.model.*;
 import com.mk.convention.respository.OrderRepository;
 import com.mk.convention.respository.ProductPriceInfoRepository;
+import com.mk.convention.respository.es.ProductAreaRepository;
 import com.mk.convention.respository.es.ProductDetailRepository;
 import com.mk.convention.persistence.model.JDBaseArea;
 import com.mk.convention.respository.JDBaseAreaRepository;
+import com.mk.convention.respository.es.ProductImageRepository;
 import com.mk.convention.service.HttpService;
 import com.mk.convention.service.JDOpenApiService;
 import com.mk.convention.utils.JDOpenApiUtils;
 import com.mk.convention.utils.JsonUtils;
 import com.mk.convention.utils.OKHttpClientUtil;
+import com.mk.convention.utils.jd.JDHttpTool;
 import com.mk.convention.utils.jd.JdDataPublisher;
 import com.mk.convention.utils.jd.JdTransformTool;
 import com.mk.convention.utils.jd.JdTransformTool.JdDataEventType;
@@ -41,6 +43,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -103,6 +106,10 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Value("${jd.openApi.getDetail}")
     private  String getDetail;
 
+    //获取商品图片
+    @Value("${jd.openApi.getImage}")
+    private String getImage;
+
     //商品上下架狀態
     @Value("${jd.openApi.getSkuState}")
     private String getSkuState;
@@ -130,11 +137,21 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Value("${jd.refreshToken}")
     private String refreshToken;
 
+    @Value("${jd.openApi.cancelOrder}")
+    private String cancelOrder;
+
+    @Value("${jd.openApi.submitOrder}")
+    private String submitOrder;
+
 
     @Autowired
     private JDBaseAreaRepository jdBaseAreaRepository;
     @Autowired
     private ProductDetailRepository productDetailRepository;
+    @Autowired
+    private ProductImageRepository productImageRepository;
+    @Autowired
+    private ProductAreaRepository productAreaRepository;
     //获取商品分类信息
     @Value("${jd.openApi.getCategory}")
     private String getCategory;
@@ -357,12 +374,12 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
             // 调用京东open api
             String response = commonHttpService.doPost(url, params, "utf-8");
-            long t2 = System.currentTimeMillis();
-
-              JsonResult jsonResult = handleResponse(response);
-            if(jsonResult.getCode().equals("500")){
-                return RefreShAccessToken(method,data);
-            }
+//            long t2 = System.currentTimeMillis();
+//
+//              JsonResult jsonResult = handleResponse(response);
+//            if(jsonResult.getCode().equals("500")){
+//                return RefreShAccessToken(method,data);
+//            }
             return handleResponse(response);
         } catch (Exception e) {
             return initServerError("server error");
@@ -887,5 +904,237 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             }
         }
     }
+    /**
+    * @Description: 获取图片
+    * @Param:
+    * @return:
+    * @Author: Miaoxy
+    * @Date: 5/8/2018
+    **/
+    @Override
+    public JsonResult getSkuImage() throws InterruptedException{
+        HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
+        ProductImageData cateData = null;
+        ArrayList results = this.dataSource.executeQuery("select count(*) cnt from new_category", null);
+        Object[] obj = (Object[]) results.get(0);
+        Integer count = obj[0]==null? 0 : Integer.parseInt(String.valueOf(obj[0]));
+        int index = 500;
+        int page = 0;
+        int pageCount = count/index;
+        if (count%index>0) {
+            pageCount++;
+        }
+        for (int i=0;i<pageCount;i++) {//数据查询一页作为一次任务
+            paramData.put("token",ACCESS_TOKEN);
+            paramData.put("index",String.valueOf(index));
+            paramData.put("pageNum",String.valueOf(i*index));
 
+            cateData = new ProductImageData();//请求接口
+            cateData.setMethod(getImage);//获取商品详情接口
+            cateData.setData(paramData);
+            cateData.setLogTag("jd.getSkuImage");
+            JdTransformTool.produce(cateData,productImageRepository);
+        }
+        JsonResult result = new JsonResult();
+        result.setCode(200);
+        result.setMessage("拉取数据保存完成");
+        return result;
+    }
+    /** 
+    * @Description: 获取基础地区表信息
+    * @Author: Miaoxy 
+    * @Date: 5/8/2018 
+    **/
+    @Override
+    public JsonResult getSkuAddress() throws InterruptedException {
+        HashMap<String,String> paramData = new HashMap<String,String>();
+        ProductAreaData cateData = new ProductAreaData();
+        paramData.put("token",ACCESS_TOKEN);
+        cateData.setData(paramData);
+        cateData.setLogTag("jd.getSkuAddress");
+        cateData.setMethod(getProvince+","+getCity+","+getCounty+","+getTown);
+        JdTransformTool.produce(cateData,productAreaRepository);
+
+        JsonResult result = new JsonResult();
+        result.setCode(200);
+        result.setMessage("拉取数据保存完成");
+        return result;
+    }
+
+	@Override
+	public JSONArray syncCategoryNew2() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    /**
+     * @Description: 取消订单接口
+     * @Param:
+     * @return:
+     * @Author: lzm
+     * @Date: 2018/5/8
+     */
+    @Override
+    public JsonResult cancelOrder(String jdOrderId) {
+        HashMap<String,String> data = new HashMap<>();
+        data.put("jdOrderId",jdOrderId);
+        data.put("token",ACCESS_TOKEN);
+        return packageParams(cancelOrder,data,"jd.cancelOrder");
+    }
+
+
+    /**
+     * @Description: 统一下单 京东
+     * @Param:  orderSyncOrderRequest
+     * @return:  JsonResult
+     * @Author: lzm
+     * @Date: 2018/5/8
+     */
+    @Override
+    public JsonResult submitOrder(OrderSyncOrderRequest orderSyncOrderRequest) {
+        OrderJdInfo orderJdInfo = transformationOrderToJd(orderSyncOrderRequest);
+        HashMap<String,String> data = new HashMap<>();
+        try {
+            data = objectToMap(orderJdInfo);
+            data.put("token",ACCESS_TOKEN);
+            logger.error("请求json字符串:" + JSONObject.toJSONString(data));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return packageParamsToOrder(submitOrder,data,"jd.submitOrder");
+    }
+
+    /**
+     * @Description: 统一下单数据转换成京东的字段
+     * @Param:  orderSyncOrderRequest
+     * @return:  OrderJdInfo
+     * @Author: lzm
+     * @Date: 2018/5/8
+     */
+    public OrderJdInfo transformationOrderToJd(OrderSyncOrderRequest orderSyncOrderRequest){
+        OrderAddressWms orderAddress = orderSyncOrderRequest.getOrderAddress();
+        OrderWms orderWms = orderSyncOrderRequest.getOrder();
+        List<OrderDetailsWms> orderDetails = orderSyncOrderRequest.getOrderDetails();
+        OrderJdInfo orderJdInfo = new OrderJdInfo();
+        orderJdInfo.setThirdOrder(orderSyncOrderRequest.getSaleOrderCode());
+        JSONArray jsonArray = new JSONArray();
+        if(orderDetails!=null){//SKU信息
+            for (OrderDetailsWms orderDetailsWms : orderDetails){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("skuId",orderDetailsWms.getProductSku());
+                jsonObject.put("num",orderDetailsWms.getQty());
+                jsonObject.put("bNeedGift",false);//是否需要赠品  需要设置开关
+                jsonObject.put("bNeedAnnex",true);//是否需要附件
+                jsonArray.add(jsonObject);
+            }
+        }
+        String sku = jsonArray.toJSONString();
+        if(orderAddress!=null){
+            orderJdInfo.setName(orderAddress.getName());
+            orderJdInfo.setProvince(2);//省份 测试 默认给了上海
+            orderJdInfo.setCity(2830);//城市
+            orderJdInfo.setCounty(51832);//三级地址
+            orderJdInfo.setTown(0);//四级地址 (如果该地区有四级地址，则必须传递四级地址，没有四级地址则传 0)
+            orderJdInfo.setAddress(orderAddress.getLine1());
+            orderJdInfo.setZip(orderAddress.getPostalCode());
+            orderJdInfo.setMobile(orderAddress.getPhone());
+            orderJdInfo.setEmail(orderWms.getBuyerMail());//邮箱
+        }
+        orderJdInfo.setSku(sku);
+        orderJdInfo.setInvoiceState(2);//开票方式(1 为随货开票，0 为订单预借，2 为集中开票 )
+        orderJdInfo.setInvoiceType(2);//1 普通发票 2 增值税发票 3 电子发票
+        orderJdInfo.setSelectedInvoiceTitle(5);//必须(发票类型：4 个人，5 单位)
+        orderJdInfo.setCompanyName("上海乐辅电子商务有限公司");//发票抬头
+        orderJdInfo.setInvoiceContent(1);//:1明细，3：电脑配件，19:耗材，22：办公用品备注:若增值发票则只能选 1 明细
+        orderJdInfo.setPaymentType(4);//支付方式 (1：货到付款，2：邮局付款，4：余额支付，5：公司转账（公对公转账），7：网银钱包，101：金采支付)
+        orderJdInfo.setIsUseBalance(1);//使用余额 paymentType=4 时，此值固定是 1 其他支付方式 0
+        orderJdInfo.setSubmitState(1);//是否预占库存，0 是预占库存（需要调用确认订单接口），1 是不预占库存
+        orderJdInfo.setDoOrderPriceMode(0);//下单价格模式 0: 客户端订单价格快照不做验证对比，还是以京东价格正常下单;1:必需验证客户端单价格快照，如果快照与京东价格不一致返回下单失败，需要更新商品价格后，重新下单;
+        orderJdInfo.setInvoiceName("财务部");//增值票收票人姓名
+        orderJdInfo.setInvoicePhone("13671848569");//增值票收票电话
+        orderJdInfo.setInvoiceProvice(2);//上海
+        orderJdInfo.setInvoiceCity(2830);//浦东新区
+        orderJdInfo.setInvoiceCounty(51827);//书院镇
+        orderJdInfo.setInvoiceAddress("浦东新区书院镇石潭街109号238室");
+        return orderJdInfo;
+    }
+
+    /**
+     * 获取利用反射获取类里面的值和名称
+     *
+     * @param obj
+     * @return
+     * @throws IllegalAccessException
+     */
+    public HashMap<String, String> objectToMap(Object obj) throws IllegalAccessException {
+        HashMap<String, String> map = new HashMap<>();
+        Class<?> clazz = obj.getClass();
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object value = field.get(obj);
+            if(value == null){
+                map.put(fieldName, "");
+            }else{
+                map.put(fieldName, value.toString());
+            }
+        }
+        return map;
+    }
+
+    /**
+     * @Author liukun
+     * @param
+     * @return
+     */
+    private JsonResult packageParamsToOrder(String method,HashMap<String, String> data, String logTag){
+
+        TreeMap<String, String> paramsMap = null;
+        paramsMap = JDOpenApiUtils.packageParams(data);
+
+        List<NameValuePair> params = new ArrayList<>();
+        for (Map.Entry<String, String> entry : paramsMap.entrySet()) {
+            params.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+        }
+
+        String url = jdOpenApiHost + method;
+        try {
+            long t1 = System.currentTimeMillis();
+
+            // 调用京东open api
+            String response = commonHttpService.doPost(url, params, "utf-8");
+//            long t2 = System.currentTimeMillis();
+
+//            JsonResult jsonResult = handleResponse(response);
+//            if(jsonResult.getCode().equals("500")){
+//                return RefreShAccessToken(method,data);
+//            }
+            return handleResponseToOrder(response);
+        } catch (Exception e) {
+            return initServerError("server error");
+        }
+    }
+
+    private JsonResult handleResponseToOrder(String response) {
+
+        if (StringUtils.isEmpty(response)) {
+            if (null != logger) {
+                logger.error(".handleResponse() response is empty");
+            }
+            return initServerError(".handleResponse() response is empty");
+        }
+
+        JSONObject responseObj = JSON.parseObject(response);
+
+        String success = responseObj.getString("success");
+        String message = responseObj.getString("resultMessage");
+        if ("true".equals(success)) {
+            return initSuccessResult(responseObj.get("result"));
+        } else {
+            if (null != logger) {
+                logger.error(".handleResponse() fail. response={}", response);
+            }
+            return initServerError(message);
+        }
+    }
 }

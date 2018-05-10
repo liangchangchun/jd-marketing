@@ -2,6 +2,7 @@ package com.mk.convention.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.mk.convention.meta.JsonResult;
+import com.mk.convention.model.OrderSyncOrderRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,11 @@ public interface JDOpenApiService {
    JsonResult syncCategoryDetail();
    JsonResult syncCategory();
    JSONArray syncCategoryNew();
+   /**
+    * 存储到索引
+    * @return
+    */
+   JSONArray syncCategoryNew2();
    JSONArray syncCategoryNew3();
    JsonResult getSellPrice(String skuIds);
 
@@ -131,4 +137,26 @@ public interface JDOpenApiService {
    JsonResult getRefreshToken();
 
    JsonResult RefreShAccessToken(String method, HashMap<String, String> data);
+
+    JsonResult getSkuImage() throws InterruptedException;
+
+    JsonResult getSkuAddress() throws InterruptedException;
+
+    /**
+     * @Description: 取消京东订单
+     * @Param:
+     * @return:
+     * @Author: lzm
+     * @Date: 2018/5/8
+     */
+    JsonResult cancelOrder(String jdOrderId);
+
+    /**
+     * @Description: 提交京东订单
+     * @Param:
+     * @return:
+     * @Author: lzm
+     * @Date: 2018/5/8
+     */
+    JsonResult submitOrder(OrderSyncOrderRequest orderSyncOrderRequest);
 }

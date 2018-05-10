@@ -70,13 +70,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--qcloudsms-->
+            <!--qcloudsms
         <dependency>
             <groupId>com.github.qcloudsms</groupId>
             <artifactId>sms</artifactId>
             <version>${qcloudsms.version}</version>
-        </dependency>
- 
+        </dependency>-->
+ <!--
      <dependency>
             <groupId>com.easemob</groupId>
             <artifactId>rest-java-sdk</artifactId>
@@ -87,14 +87,14 @@
                     <artifactId>okhttp</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-             <!-- json -->
+        </dependency>-->
+             <!-- json
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<version>${json-lib.version}</version>
 			<classifier>jdk15</classifier>
-	      </dependency>
+	      </dependency> -->
 		   <!-- 微信支付 -->
         <!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
         <dependency>
@@ -113,12 +113,12 @@
     			<artifactId>jdom</artifactId>
     			<version>${jdom.version}</version>
 		</dependency>
-        <!-- tcc 事务控制 -->
+        <!-- tcc 事务控制
         <dependency>
             <groupId>org.bytesoft</groupId>
             <artifactId>bytetcc-supports-springcloud</artifactId>
             <version>0.4.1</version>
-        </dependency>
+        </dependency>-->
             
        <dependency>
             <groupId>org.projectlombok</groupId>
@@ -174,11 +174,7 @@
    			 <artifactId>javax.servlet-api</artifactId>
     		<version>${servlet.version}</version>
 		</dependency>
-            <dependency>
-                <groupId>com.stylefeng</groupId>
-                <artifactId>zww-generator</artifactId>
-                <version>${zww.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-basic</artifactId>

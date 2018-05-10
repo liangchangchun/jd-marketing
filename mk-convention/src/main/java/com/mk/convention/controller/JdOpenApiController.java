@@ -3,6 +3,7 @@ package com.mk.convention.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.mk.convention.meta.JsonResult;
+import com.mk.convention.model.OrderSyncOrderRequest;
 import com.mk.convention.service.JDOpenApiService;
 import com.stylefeng.guns.core.util.ResponseCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,5 +143,55 @@ public class JdOpenApiController {
     @ResponseBody
     public JsonResult getJDBaseArea(){
         return jdOpenApiService.saveAllJdArea();
+    }
+
+    /**
+    * @Description: 统一下单接口 submitOrder
+    * @Param:
+    * @return:
+    * @Author: Miaoxy
+    * @Date: 5/8/2018
+    **/
+   /* @RequestMapping(value = "/submitOrder",method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult submitOrder(){
+        return jdOpenApiService.submitOrder();
+    }*/
+
+   /**
+   * @Description: 获取商品图片
+   * @Author: Miaoxy
+   * @Date: 5/8/2018
+   **/
+   @RequestMapping(value = "/getSkuImage",method = RequestMethod.GET)
+   @ResponseBody
+   public JsonResult getSkuImage() throws InterruptedException {
+       return jdOpenApiService.getSkuImage();
+   }
+    
+   /** 
+   * @Description: 获取商品地址
+   * @Param:  
+   * @return:  
+   * @Author: Miaoxy 
+   * @Date: 5/8/2018 
+   **/
+   @RequestMapping(value = "/getSkuAddress",method = RequestMethod.GET)
+   @ResponseBody
+   public JsonResult getSkuAddress() throws InterruptedException {
+       return jdOpenApiService.getSkuAddress();
+   }
+
+    @RequestMapping(value = "/cancelOrder/{orderId}",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult cancelOrder(@PathVariable(value = "orderId") String jdOrderId){
+        return jdOpenApiService.cancelOrder(jdOrderId);
+    }
+
+
+    @RequestMapping(value = "/submitOrder",method = RequestMethod.POST)
+    @ResponseBody
+    public JsonResult submitOrder(@RequestBody OrderSyncOrderRequest orderSyncOrderRequest){
+        return jdOpenApiService.submitOrder(orderSyncOrderRequest);
     }
 }

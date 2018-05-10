@@ -3,9 +3,7 @@ package com.mk.convention.jdapi;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.springframework.data.elasticsearch.annotations.Document;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Stopwatch;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -65,7 +63,7 @@ public class ProductDetailData  extends BaseDataEvent implements DataEvent,java.
 			 for (int j=0,jlen =categorys.size() ; j<jlen ; j++) {
 				 Object[] category = (Object[]) categorys.get(j);
 				 String sku =  String.valueOf(category[1]);
-	     		data.put("sku", sku);
+				 data.put("sku", sku);
 	     		//Stopwatch stopwatch = null;
 	     		JsonResult resFirst  = JDHttpTool.getInstance().packageParams(req.getMethod(),data,req.logTag);//请求商品详情 
 	     		if (resFirst.get("result")==null) {
