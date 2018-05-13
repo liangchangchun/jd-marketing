@@ -13,10 +13,9 @@ import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 
 //单元测试类
-public class TestDisruptor {
+public class TestDisruptor2 {
   private static final Logger log = LoggerFactory
-          .getLogger(TestDisruptor.class);
-
+          .getLogger(TestDisruptor2.class);
   @Test
   public void myTest() throws Exception {
 	  Executor executor = Executors.newCachedThreadPool();
@@ -25,18 +24,24 @@ public class TestDisruptor {
               ProducerType.SINGLE, new YieldingWaitStrategy());
 
       disruptor.handleExceptionsWith(new MyHandlerException());
-     // disruptor.handleEventsWith(new Handler1());
-     // disruptor.handleEventsWithWorkerPool(new Handler1());
-      disruptor.handleEventsWithWorkerPool(new Handler1())
+     // disruptor.handleEventsWith(new ProductDetailHandler());
+      disruptor.handleEventsWithWorkerPool(new ProductDetailHandler());
+     /* disruptor.handleEventsWithWorkerPool(new Handler1())
               .thenHandleEventsWithWorkerPool(new Handler11())
               .thenHandleEventsWithWorkerPool(new Handler2());
-
+      	*/
       disruptor.start();
-
-      MyEventProduce ep = new MyEventProduce().setDisruptor(disruptor);
-      CountDownLatch countDownLatch = ep.getCountDownLatch();
-      executor.execute(ep);
+      CountDownLatch countDownLatch = new CountDownLatch(1);
+      for (int i=0;i<10;i++) {
+    	//  int no = i + 1;
+    	  long seq = disruptor.getRingBuffer().next();
+    	  NewProduce ep1 = new NewProduce().setDisruptor(disruptor,seq,countDownLatch);
+    	  executor.execute(ep1);
+      }
+      
       countDownLatch.await();
+     // countDownLatch2.await();
+      
       disruptor.shutdown();
 
       log.debug("运行完毕");

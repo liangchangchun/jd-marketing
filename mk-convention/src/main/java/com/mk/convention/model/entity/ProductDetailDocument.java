@@ -14,7 +14,7 @@ import lombok.Data;
 public class ProductDetailDocument  implements DataEvent,java.io.Serializable{
 	private static final long serialVersionUID = -8776170337442283017L;
 	
-	public static final String INDEX = "product";
+	public static final String INDEX = "product_detail";
     public static final String TYPE = "detail";
 
     /**

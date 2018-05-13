@@ -159,7 +159,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Autowired
     private HttpService commonHttpService;
 
-    @PostConstruct public void init(){this.getRefreShToken();}
+    //@PostConstruct public void init(){this.getRefreShToken();}
 
     @Override
     public JsonResult getAccessToken() {

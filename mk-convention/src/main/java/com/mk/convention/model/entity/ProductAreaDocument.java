@@ -17,7 +17,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Document(indexName = ProductAreaDocument.INDEX, type = ProductAreaDocument.TYPE)
 public class ProductAreaDocument implements DataEvent,java.io.Serializable{
 
-    public static final String INDEX = "product_area_a";
+    public static final String INDEX = "product_area";
     public static final String TYPE = "area";
     private static final long serialVersionUID = 2144680796145137212L;
 
