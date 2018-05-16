@@ -25,7 +25,6 @@ public class ProductAreaDocument implements DataEvent,java.io.Serializable{
      * dizhi
      */
     @Id
-    @Field(type = FieldType.keyword)
     private String areaId;
     /**
      * 商品信息

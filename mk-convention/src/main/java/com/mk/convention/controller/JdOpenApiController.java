@@ -30,10 +30,17 @@ public class JdOpenApiController {
         return jdOpenApiService.getAccessToken();
     }
 
-    @RequestMapping(value = "/getPageNum",method = RequestMethod.GET)
+    /** 
+    * @Description: 获取商品池id
+    * @Param:  
+    * @return:  
+    * @Author: lzm
+    * @Date: 2018/5/15 
+    */ 
+    @RequestMapping(value = "/getProductPoll",method = RequestMethod.GET)
     @ResponseBody
-    public JsonResult getPageNum() {
-        return jdOpenApiService.getPageNum();
+    public JsonResult getProductPoll() {
+        return jdOpenApiService.getProductPoll();
     }
 
     @RequestMapping(value = "/syncCategory",method = RequestMethod.GET)
@@ -48,7 +55,7 @@ public class JdOpenApiController {
     @RequestMapping(value = "/syncCategoryNew",method = RequestMethod.GET)
     @ResponseBody
     public JSONArray syncCategoryNew() {
-        return jdOpenApiService.syncCategoryNew3();
+        return jdOpenApiService.syncCategoryNew2();
     }
     /**
      * 根据数据库skuIds 拉取商品详情 并保存
@@ -193,5 +200,10 @@ public class JdOpenApiController {
     @ResponseBody
     public JsonResult submitOrder(@RequestBody OrderSyncOrderRequest orderSyncOrderRequest){
         return jdOpenApiService.submitOrder(orderSyncOrderRequest);
+    }
+    @RequestMapping(value = "/exportImg",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult exportImg(){
+        return jdOpenApiService.exportImg();
     }
 }

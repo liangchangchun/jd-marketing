@@ -4,7 +4,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ public class TestDisruptor {
   private static final Logger log = LoggerFactory
           .getLogger(TestDisruptor.class);
 
-  @Test
   public void myTest() throws Exception {
 	  Executor executor = Executors.newCachedThreadPool();
       Disruptor<MyEvent> disruptor = new Disruptor<>(new MyEventFactory(),
@@ -25,8 +23,6 @@ public class TestDisruptor {
               ProducerType.SINGLE, new YieldingWaitStrategy());
 
       disruptor.handleExceptionsWith(new MyHandlerException());
-     // disruptor.handleEventsWith(new Handler1());
-     // disruptor.handleEventsWithWorkerPool(new Handler1());
       disruptor.handleEventsWithWorkerPool(new Handler1())
               .thenHandleEventsWithWorkerPool(new Handler11())
               .thenHandleEventsWithWorkerPool(new Handler2());

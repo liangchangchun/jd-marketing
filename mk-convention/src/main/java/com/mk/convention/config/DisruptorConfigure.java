@@ -3,6 +3,9 @@ package com.mk.convention.config;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -27,9 +30,16 @@ public class DisruptorConfigure {
 		//ExecutorService executor = Executors.newCachedThreadPool();
 		ExecutorService executor = executorService();
 		JdDataEventFactory factory = new JdDataEventFactory();
-    	 Disruptor<JdDataEvent> disruptor = new Disruptor<JdDataEvent>(factory, 1024, executor, ProducerType.SINGLE , new YieldingWaitStrategy());
-    	 disruptor.setDefaultExceptionHandler(new JDExceptionHandler());
-    	 disruptor.handleEventsWith(new JdEventHandler());
+    	 Disruptor<JdDataEvent> disruptor = new Disruptor<JdDataEvent>(factory, 1024*1024, executor, ProducerType.MULTI , new YieldingWaitStrategy());
+    	 disruptor.setDefaultExceptionHandler(new JDExceptionHandler(disruptor));
+    	 //disruptor.handleEventsWith(new JdEventHandler());
+    	// 创建10个消费者来处理同一个生产者发的消息(这10个消费者不重复消费消息)  
+    	JdEventHandler[] consumers = new JdEventHandler[1000];  
+         for (int i = 0; i < consumers.length; i++) {  
+             consumers[i] = new JdEventHandler();  
+         }  
+    	 disruptor.handleEventsWithWorkerPool(consumers);
+    	 
     	 disruptor.start();
     	/*
     	 CountDownLatch countDownLatch = new CountDownLatch(1);// 一个生产者线程准备好了就可以通知主线程继续工作了
@@ -51,7 +61,7 @@ public class DisruptorConfigure {
 	
 	@Bean(name="executor")
 	public ExecutorService executorService() {
-		ExecutorService executor = Executors.newCachedThreadPool();
+		ExecutorService executor = new ThreadPoolExecutor(0, 1024, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 		return executor;
 	}
 }

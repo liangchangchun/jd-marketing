@@ -12,9 +12,12 @@ import com.mk.convention.meta.JsonResult;
 import com.mk.convention.model.Category;
 import com.mk.convention.model.ProductPriceInfo;
 import com.mk.convention.model.SkuByPage;
+import com.mk.convention.model.entity.CategoryDocument;
+import com.mk.convention.model.entity.ProductDetailDocument;
 import com.mk.convention.model.*;
 import com.mk.convention.respository.OrderRepository;
 import com.mk.convention.respository.ProductPriceInfoRepository;
+import com.mk.convention.respository.es.CategoryRepository;
 import com.mk.convention.respository.es.ProductAreaRepository;
 import com.mk.convention.respository.es.ProductDetailRepository;
 import com.mk.convention.persistence.model.JDBaseArea;
@@ -38,13 +41,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -143,6 +152,53 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Value("${jd.openApi.submitOrder}")
     private String submitOrder;
 
+    @Value("${jd.openApi.invoiceName}")
+    private String invoiceName;
+
+    @Value("${jd.openApi.invoicePhone}")
+    private String invoicePhone;
+
+    @Value("${jd.openApi.invoiceProvice}")
+    private Integer invoiceProvice;
+
+    @Value("${jd.openApi.invoiceCity}")
+    private Integer invoiceCity;
+
+    @Value("${jd.openApi.invoiceCounty}")
+    private Integer invoiceCounty;
+
+    @Value("${jd.openApi.invoiceAddress}")
+    private String invoiceAddress;
+
+    @Value("${jd.openApi.companyName}")
+    private String companyName;
+
+    @Value("${jd.openApi.invoiceState}")
+    private Integer invoiceState;
+
+    @Value("${jd.openApi.invoiceType}")
+    private Integer invoiceType;
+
+    @Value("${jd.openApi.selectedInvoiceTitle}")
+    private Integer selectedInvoiceTitle;
+
+    @Value("${jd.openApi.invoiceContent}")
+    private Integer invoiceContent;
+
+    @Value("${jd.openApi.paymentType}")
+    private Integer paymentType;
+
+    @Value("${jd.openApi.isUseBalance}")
+    private Integer isUseBalance;
+
+    @Value("${jd.openApi.submitState}")
+    private Integer submitState;
+
+    @Value("${jd.openApi.doOrderPriceMode}")
+    private Integer doOrderPriceMode;
+
+    @Value("${jd.openApi.bNeedGift}")
+    private String bNeedGift;
 
     @Autowired
     private JDBaseAreaRepository jdBaseAreaRepository;
@@ -152,6 +208,8 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     private ProductImageRepository productImageRepository;
     @Autowired
     private ProductAreaRepository productAreaRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
     //获取商品分类信息
     @Value("${jd.openApi.getCategory}")
     private String getCategory;
@@ -159,7 +217,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Autowired
     private HttpService commonHttpService;
 
-    //@PostConstruct public void init(){this.getRefreShToken();}
+    @PostConstruct public void init(){this.getRefreShToken();}
 
     @Override
     public JsonResult getAccessToken() {
@@ -174,10 +232,31 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
      * @return
      */
     @Override
-    public JsonResult getPageNum(){
+    public JsonResult getProductPoll(){
         HashMap<String, String> data = new HashMap<>();
         data.put("token",ACCESS_TOKEN);
         return packageParams(getPageNum,data,"jd.getPageNum");
+      /*  JsonResult jsonResult = new JsonResult();
+        jsonResult.setCode(200);
+        jsonResult.setMessage(null);
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name","乐富购 数码类");
+        jsonObject.put("page_num","3941696");
+        jsonArray.add(jsonObject);
+
+        JSONObject jsonObject2 = new JSONObject();
+        jsonObject2.put("name","普通商品池2");
+        jsonObject2.put("page_num","3907396");
+        jsonArray.add(jsonObject2);
+
+        JSONObject jsonObject3 = new JSONObject();
+        jsonObject3.put("name","家具日常");
+        jsonObject3.put("page_num","3876133");
+        jsonArray.add(jsonObject3);
+        jsonResult.setResult(jsonArray);
+        return jsonResult;
+        */
     }
 
     @Override
@@ -202,31 +281,37 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
      */
 	@Override
 	public JsonResult syncCategoryDetail2() throws InterruptedException {
-		 HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
-		 ProductDetailData cateData = null;
+		elasticsearchTemplate.deleteIndex(ProductDetailDocument.class);
 		 ArrayList results = this.dataSource.executeQuery("select count(*) cnt from new_category", null);
 		 Object[] obj = (Object[]) results.get(0);
 		 Integer count = obj[0]==null? 0 : Integer.parseInt(String.valueOf(obj[0]));
-		 int index = 500;
+		 final int index = 50;
 		 int page = 0;
 		 int pageCount = count/index;
 		 if (count%index>0) {
 			 pageCount++; 
 		 }
+		 //ExecutorService executorService = Executors.newFixedThreadPool(10);
+		 HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
+		 	paramData.put("token",ACCESS_TOKEN);
+    	 	paramData.put("index",String.valueOf(index));
 		 for (int i=0;i<pageCount;i++) {//数据查询一页作为一次任务  
-			 	paramData.put("token",ACCESS_TOKEN);
-    	 		paramData.put("index",String.valueOf(index));
-    	 		paramData.put("pageNum",String.valueOf(i*index));
-    	 
-    	 	cateData = new ProductDetailData();//请求接口
-         	cateData.setMethod(getDetail);//获取商品详情接口
-         	cateData.setData(paramData);
-         	cateData.setLogTag("jd.getSkuByPage");
-         	JdTransformTool.produce(cateData,productDetailRepository);
-		 }
+		//	final int ci = i;
+		//	 executorService.execute(new Runnable() {
+		//		 public void run() {
+			    	 	paramData.put("pageNum",String.valueOf(i*index));
+			    	 	ProductDetailData cateData = new ProductDetailData();//请求接口
+			         	cateData.setMethod(getDetail);//获取商品详情接口
+			         	cateData.setData(paramData);
+			         	cateData.setLogTag("jd.getSkuByPage");
+						JdTransformTool.produce(cateData,productDetailRepository);
+			}
+			//});
+		 //}
 		JsonResult result = new JsonResult();
 		result.setCode(200);
 		result.setMessage("拉取数据保存完成");
+		// executorService.shutdown();
 		return result;
 	}
 
@@ -246,7 +331,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     public JsonResult getSellPrice(String skuIds) {
         Long count=0L;
 
-        JsonResult pageNum = this.getPageNum();
+        JsonResult pageNum = this.getProductPoll();
 
         List<Category> list = JsonUtils.fromJson(JsonUtils.toJson(pageNum.getResult4()), List.class, Category.class);
 //        ProductPriceInfo productPriceInfo=new ProductPriceInfo();
@@ -394,7 +479,6 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             }
             return initServerError(".handleResponse() response is empty");
         }
-
         JSONObject responseObj = JSON.parseObject(response);
 
         String code = responseObj.getString("resultCode");
@@ -430,7 +514,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
     @Override
     public JsonResult syncCategory() {
-        JsonResult j = getPageNum();
+        JsonResult j = getProductPoll();
         JSONArray jsonArray = j.getResult2();
         for (int i = 0 ;i < jsonArray.size();i++){
             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -457,7 +541,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
                 }
                 String sqls = bf.toString();
                 sqls = sqls.substring(0, sqls.length()-1);
-                dataSource.executeUpdate("insert into new_category(sku_id,category_id) values "+sqls, null);
+                dataSource.executeUpdate("insert into category_img(sku_id,category_id) values "+sqls, null);
                 if(skuids.size()>=500){
                     index++;
                 }else{
@@ -468,11 +552,60 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         return null;
     }
     
+    @Autowired
+    ElasticsearchTemplate elasticsearchTemplate;
+    
+	@Override
+	public JSONArray syncCategoryNew2() {
+		elasticsearchTemplate.deleteIndex(CategoryDocument.class);
+		JSONObject jsonObject = null;
+        JsonResult j = getProductPoll();
+        Stopwatch stopwatchAll =Stopwatch.createStarted();
+        JSONArray jsonArray = j.getResult2();
+        //long allNum = 0L;
+        String name = "";
+        String page_num = "";
+       // int skuNum =0;
+        try {
+        	int length = jsonArray.size();
+        for (int i = 0;i < length;i++){
+       // int i= 0;
+        	//stopwatch =Stopwatch.createStarted();
+             jsonObject = jsonArray.getJSONObject(i);
+             name = jsonObject.getString("name");
+             page_num = jsonObject.getString("page_num");
+             //skuNum = syncCategoryPage2(page_num);//skuId数量
+        	// String command = "JDBC_SAVE";
+        	 HashMap<String,String> paramData = new HashMap<String,String>();//请求接口参数
+        	 paramData.put("token",ACCESS_TOKEN);
+        	 paramData.put("pageNum", page_num);
+        	 paramData.put("name", name);
+             CategoryData cateData = new CategoryData();//请求接口
+             cateData.setMethod(getSkuByPage);//
+             cateData.setData(paramData);
+             cateData.setLogTag("jd.getSkuByPage");
+             cateData.setTableName("new_category");
+           //默认数据发布保存到数据库
+			JdTransformTool.produce(cateData,categoryRepository);
+            //allNum += skuNum;
+           // long nanos = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+            // System.out.println("商品池请求编号:【"+page_num+"】,第"+i+"个商品名称:" + name+" 数量:"+skuNum+"程序运行时间: "+nanos+"ns");
+        	}
+    	} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        long nanosAll = stopwatchAll.elapsed(TimeUnit.NANOSECONDS);
+        long nanosAlls = stopwatchAll.elapsed(TimeUnit.SECONDS);
+        System.out.println("商品池请求编号全部获取时长:"+nanosAll+" ns,"+nanosAlls+"秒,商品池数量"+jsonArray.size());
+        return jsonArray;
+	}
+    
     @Override
     public JSONArray syncCategoryNew() {
     	Stopwatch stopwatch = null;
     	JSONObject jsonObject = null;
-        JsonResult j = getPageNum();
+        JsonResult j = getProductPoll();
         Stopwatch stopwatchAll =Stopwatch.createStarted();
         JSONArray jsonArray = j.getResult2();
         long allNum = 0L;
@@ -501,7 +634,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
     @Override
     public JSONArray syncCategoryNew3() {
     	JSONObject jsonObject = null;
-        JsonResult j = getPageNum();
+        JsonResult j = getProductPoll();
         Stopwatch stopwatchAll =Stopwatch.createStarted();
         JSONArray jsonArray = j.getResult2();
         //long allNum = 0L;
@@ -961,11 +1094,6 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         return result;
     }
 
-	@Override
-	public JSONArray syncCategoryNew2() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
     /**
      * @Description: 取消订单接口
@@ -1004,6 +1132,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         return packageParamsToOrder(submitOrder,data,"jd.submitOrder");
     }
 
+
     /**
      * @Description: 统一下单数据转换成京东的字段
      * @Param:  orderSyncOrderRequest
@@ -1023,7 +1152,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("skuId",orderDetailsWms.getProductSku());
                 jsonObject.put("num",orderDetailsWms.getQty());
-                jsonObject.put("bNeedGift",false);//是否需要赠品  需要设置开关
+                jsonObject.put("bNeedGift",bNeedGift);//是否需要赠品  需要设置开关
                 jsonObject.put("bNeedAnnex",true);//是否需要附件
                 jsonArray.add(jsonObject);
             }
@@ -1041,21 +1170,21 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             orderJdInfo.setEmail(orderWms.getBuyerMail());//邮箱
         }
         orderJdInfo.setSku(sku);
-        orderJdInfo.setInvoiceState(2);//开票方式(1 为随货开票，0 为订单预借，2 为集中开票 )
-        orderJdInfo.setInvoiceType(2);//1 普通发票 2 增值税发票 3 电子发票
-        orderJdInfo.setSelectedInvoiceTitle(5);//必须(发票类型：4 个人，5 单位)
-        orderJdInfo.setCompanyName("上海乐辅电子商务有限公司");//发票抬头
-        orderJdInfo.setInvoiceContent(1);//:1明细，3：电脑配件，19:耗材，22：办公用品备注:若增值发票则只能选 1 明细
-        orderJdInfo.setPaymentType(4);//支付方式 (1：货到付款，2：邮局付款，4：余额支付，5：公司转账（公对公转账），7：网银钱包，101：金采支付)
-        orderJdInfo.setIsUseBalance(1);//使用余额 paymentType=4 时，此值固定是 1 其他支付方式 0
-        orderJdInfo.setSubmitState(1);//是否预占库存，0 是预占库存（需要调用确认订单接口），1 是不预占库存
-        orderJdInfo.setDoOrderPriceMode(0);//下单价格模式 0: 客户端订单价格快照不做验证对比，还是以京东价格正常下单;1:必需验证客户端单价格快照，如果快照与京东价格不一致返回下单失败，需要更新商品价格后，重新下单;
-        orderJdInfo.setInvoiceName("财务部");//增值票收票人姓名
-        orderJdInfo.setInvoicePhone("13671848569");//增值票收票电话
-        orderJdInfo.setInvoiceProvice(2);//上海
-        orderJdInfo.setInvoiceCity(2830);//浦东新区
-        orderJdInfo.setInvoiceCounty(51827);//书院镇
-        orderJdInfo.setInvoiceAddress("浦东新区书院镇石潭街109号238室");
+        orderJdInfo.setInvoiceState(invoiceState);//开票方式(1 为随货开票，0 为订单预借，2 为集中开票 )
+        orderJdInfo.setInvoiceType(invoiceType);//1 普通发票 2 增值税发票 3 电子发票
+        orderJdInfo.setSelectedInvoiceTitle(selectedInvoiceTitle);//必须(发票类型：4 个人，5 单位)
+        orderJdInfo.setCompanyName(companyName);//发票抬头
+        orderJdInfo.setInvoiceContent(invoiceContent);//:1明细，3：电脑配件，19:耗材，22：办公用品备注:若增值发票则只能选 1 明细
+        orderJdInfo.setPaymentType(paymentType);//支付方式 (1：货到付款，2：邮局付款，4：余额支付，5：公司转账（公对公转账），7：网银钱包，101：金采支付)
+        orderJdInfo.setIsUseBalance(isUseBalance);//使用余额 paymentType=4 时，此值固定是 1 其他支付方式 0
+        orderJdInfo.setSubmitState(submitState);//是否预占库存，0 是预占库存（需要调用确认订单接口），1 是不预占库存
+        orderJdInfo.setDoOrderPriceMode(doOrderPriceMode);//下单价格模式 0: 客户端订单价格快照不做验证对比，还是以京东价格正常下单;1:必需验证客户端单价格快照，如果快照与京东价格不一致返回下单失败，需要更新商品价格后，重新下单;
+        orderJdInfo.setInvoiceName(invoiceName);//增值票收票人姓名
+        orderJdInfo.setInvoicePhone(invoicePhone);//增值票收票电话
+        orderJdInfo.setInvoiceProvice(invoiceProvice);//上海
+        orderJdInfo.setInvoiceCity(invoiceCity);//浦东新区
+        orderJdInfo.setInvoiceCounty(invoiceCounty);//书院镇
+        orderJdInfo.setInvoiceAddress(invoiceAddress);
         return orderJdInfo;
     }
 
@@ -1137,4 +1266,67 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             return initServerError(message);
         }
     }
+
+
+    @Override
+    public JsonResult exportImg() {
+        ArrayList results = this.dataSource.executeQuery("select * from category_img", null);
+//        for (Object obj:results){
+//            System.out.println(JsonUtils.toJson(obj));
+//        }
+        String path = "G:\\images";
+        for (int i = 0 ; i< results.size();i++){
+            Object[] obj = (Object[]) results.get(i);
+            String sku = (String) obj[1];
+            HashMap<String,String> data = new HashMap<>();
+            data.put("sku",sku);
+            data.put("token",ACCESS_TOKEN);
+            JsonResult result = packageParams(getImage,data,"jd.getImage");
+
+            if(result.getResult3()!=null){
+                System.out.println(result.getResult3().toJSONString());
+                JSONArray jsonArray = result.getResult3().getJSONArray(sku);
+                for (int j = 0 ; j < jsonArray.size();j++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(j);
+                    Integer isPrimary = jsonObject.getInteger("isPrimary");
+                    String url = "http://img30.360buyimg.com/popWaterMark/"+jsonObject.getString("path");
+                    if(isPrimary==1){
+                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_main.jpg",path+"\\"+sku);
+                    }else{
+                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_"+j+".jpg",path+"\\"+sku);
+                    }
+                }
+            }else{
+                System.out.println("查找不到图片:"+sku);
+            }
+
+        }
+        return null;
+    }
+
+    public static void downloadPicture(String urlImage,String imageName,String fielPath){
+        try {
+            URL url = new URL(urlImage);
+            File filePackage = new File(fielPath);
+            if(!filePackage.exists()){
+                filePackage.mkdir();
+            }
+            DataInputStream dataInputStream = new DataInputStream(url.openStream());
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(imageName));
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = dataInputStream.read(buffer)) > 0) {
+                fileOutputStream.write(buffer, 0, length);
+            }
+            dataInputStream.close();
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+//    public static void main(String[] args) {
+//        downloadPicture("http://img30.360buyimg.com/popWaterMark/jfs/t1279/139/810308484/138025/bfe0342/55a5c52eN0e22f09d.jpg","G:\\images\\131665\\dsfldj.jpg","G:\\images\\131665");
+//    }
+
 }

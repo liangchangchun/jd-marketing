@@ -23,7 +23,7 @@ public interface JDOpenApiService {
      * @param
      * @return
      */
-    JsonResult getPageNum();
+    JsonResult getProductPoll();
 
     /**
      * 获取京东商品池内商品编号接口-品类商品池
@@ -159,4 +159,13 @@ public interface JDOpenApiService {
      * @Date: 2018/5/8
      */
     JsonResult submitOrder(OrderSyncOrderRequest orderSyncOrderRequest);
+    
+    /** 
+    * @Description: 导出图片
+    * @Param:  
+    * @return:  
+    * @Author: lzm
+    * @Date: 2018/5/15 
+    */ 
+    JsonResult exportImg();
 }

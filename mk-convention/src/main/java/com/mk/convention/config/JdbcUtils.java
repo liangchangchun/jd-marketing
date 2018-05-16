@@ -43,7 +43,7 @@ public class JdbcUtils {
     static {
         try {
             //利用类加载器读取配置文件
-            url = "jdbc:mysql://192.168.99.100:3306/test?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false";
+            url = "jdbc:mysql://192.168.2.88:3306/lovego-jd?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false";
             user = "root";
             driver = "com.mysql.jdbc.Driver";
             password = "admins";

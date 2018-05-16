@@ -1,6 +1,6 @@
 package com.mk.convention.utils.jd;
 
-public class JdDataPublisher extends BasePublisher implements Runnable{
+public class JdDataPublisher extends BasePublisher {
 
 	public JdDataPublisher() {
 	}

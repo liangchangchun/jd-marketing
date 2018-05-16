@@ -15,7 +15,6 @@ public class Handler1 implements EventHandler<MyEvent>, WorkHandler<MyEvent> {
   @Override
   public void onEvent(MyEvent event) throws Exception {
       log.debug(event.getName() + "====Handler1 。。。。");
-      event.getCountDownLatch().countDown();
 //      throw new RuntimeException("测试异常");
   }
 

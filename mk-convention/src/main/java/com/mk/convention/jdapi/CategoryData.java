@@ -86,8 +86,6 @@ public class CategoryData  extends BaseDataEvent implements DataEvent,java.io.Se
 	    		}
 	}
 	
-	
-	
 		/**
 		 * 插入es
 		 */

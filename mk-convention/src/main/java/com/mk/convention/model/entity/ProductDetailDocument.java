@@ -21,7 +21,6 @@ public class ProductDetailDocument  implements DataEvent,java.io.Serializable{
      * 商品SkuId
      */
     @Id
-    @Field(type = FieldType.keyword)
     private String skuId;
     /**
      * 商品信息

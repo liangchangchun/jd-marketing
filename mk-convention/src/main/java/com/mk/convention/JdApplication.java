@@ -10,7 +10,6 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 //注入es 库
 @EnableSearch
 @SpringBootApplication
-@ComponentScan(basePackages={"com.mk"})
 public class JdApplication  {
 	//日志
 	private static Logger logger = LoggerFactory.getLogger(JdApplication.class);

@@ -13,7 +13,6 @@ public class Handler11 implements EventHandler<MyEvent>, WorkHandler<MyEvent> {
   @Override
   public void onEvent(MyEvent event) throws Exception {
       log.debug(event.getName() + "====Handler11 。。。。。");
-      event.getCountDownLatch().countDown();
   }
 
   @Override

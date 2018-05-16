@@ -1,8 +1,9 @@
 package com.mk.convention.utils.jd;
 
 import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 
-public class JdEventHandler implements EventHandler<JdDataEvent>{
+public class JdEventHandler implements EventHandler<JdDataEvent>,WorkHandler<JdDataEvent>{
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -23,6 +24,11 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
 				jdDataEvent.getEsRes().delete(jdDataEvent.getEvent()) ;
 			}
 		}*/
+		onEvent(jdDataEvent);
+	}
+	
+	@Override
+	public void onEvent(JdDataEvent jdDataEvent) throws Exception {
 		if (JdTransformTool.JdDataEventType.JDBC_SAVE.toString().equals(jdDataEvent.getCommand())) {
 			jdbcSave(jdDataEvent);
 		} else if (JdTransformTool.JdDataEventType.ES_SAVE.toString().equals(jdDataEvent.getCommand()))  {
@@ -52,6 +58,7 @@ public class JdEventHandler implements EventHandler<JdDataEvent>{
         	jdDataEvent.getDataSource().executeUpdate(sqla.getSql(), sqla.getParameters());
         }
 	}
+
 	
 	
 }
