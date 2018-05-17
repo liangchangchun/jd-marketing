@@ -233,10 +233,11 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
      */
     @Override
     public JsonResult getProductPoll(){
-        HashMap<String, String> data = new HashMap<>();
+      HashMap<String, String> data = new HashMap<>();
         data.put("token",ACCESS_TOKEN);
         return packageParams(getPageNum,data,"jd.getPageNum");
-      /*  JsonResult jsonResult = new JsonResult();
+        /*
+       JsonResult jsonResult = new JsonResult();
         jsonResult.setCode(200);
         jsonResult.setMessage(null);
         JSONArray jsonArray = new JSONArray();
@@ -255,8 +256,8 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         jsonObject3.put("page_num","3876133");
         jsonArray.add(jsonObject3);
         jsonResult.setResult(jsonArray);
-        return jsonResult;
-        */
+        return jsonResult;*/
+        
     }
 
     @Override
@@ -1304,8 +1305,214 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         return null;
     }
 
+    @Override
+    public JsonResult exportIntroduceImg() {
+        ArrayList results = this.dataSource.executeQuery("select * from category_img where sku_id = '419703'", null);
+//        for (Object obj:results){
+//            System.out.println(JsonUtils.toJson(obj));
+//        }
+        String path = "G:\\introduce44";
+        for (int i = 0 ; i< results.size();i++){
+            Object[] obj = (Object[]) results.get(i);
+            String sku = (String) obj[1];
+            System.out.println(i+"DDDDDDDDDDDDD"+sku);
+            HashMap<String,String> data = new HashMap<>();
+            data.put("sku",sku);
+            data.put("token",ACCESS_TOKEN);
+            JsonResult result = packageParams(getDetail,data,"jd.getDetail");
+
+            if(result.getResult3()!=null){
+//                System.out.println(result.getResult3().toJSONString());
+//                String productArea = result.getResult3().getString("productArea");
+//                String saleUnit = result.getResult3().getString("saleUnit");
+//                String weight = result.getResult3().getString("weight");
+//                System.out.println("productArea:"+productArea+"---saleUnit:"+saleUnit+"---weight:"+weight);
+//                String sql = "update category_img set productArea = '"+productArea+"',saleUnit='"+saleUnit+"',weight='"+weight+"' where sku_id = '"+sku+"'";
+//                System.out.println(sql);
+                //this.dataSource.executeUpdate(sql,null);
+
+
+                String introduction = result.getResult3().getString("introduction");
+                List<String> list = introductionToImage(introduction);
+//                if(list.size()==0){
+//                    System.out.println(introduction);
+//                    System.out.println(sku+"-------------");
+//                }
+                for (int j = 0 ; j< list.size(); j++ ){
+                    String urmImage = list.get(j);
+                    String url = urmImage;
+                    downloadPicture(url,path+"\\"+sku+"\\"+sku+"_introduction_"+j+".jpg",path+"\\"+sku);
+                }
+            }else{
+                System.out.println("查找不到图片:"+sku);
+            }
+
+        }
+        return null;
+    }
+    public static List<String> introductionToImage(String introduction){
+        List<String> list = new ArrayList<>();
+        while(introduction.indexOf("<img    src=")>-1){
+            System.out.println("----------"+introduction);
+            String urlImage = "";
+            introduction = introduction.substring(introduction.indexOf("<img    src="),introduction.length());
+            boolean isok = false;
+            if((!isok)&&introduction.indexOf(".jpg")>0 ){
+                if((introduction.indexOf(".jpg")+4)-(introduction.indexOf("<img    src=")+13)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img    src=")+13,introduction.indexOf(".jpg")+4);
+                    introduction = introduction.substring(introduction.indexOf(".jpg")+4,introduction.length());
+                }
+            }
+            if((!isok)&&introduction.indexOf(".gif")>0){
+                if((introduction.indexOf(".gif")+4)-(introduction.indexOf("<img    src=")+13)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img    src=")+13,introduction.indexOf(".gif")+4);
+                    introduction = introduction.substring(introduction.indexOf(".gif")+4,introduction.length());
+                }
+            }
+            if((!isok)&&introduction.indexOf(".png")>0){
+                if((introduction.indexOf(".png")+4)-(introduction.indexOf("<img    src=")+13)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img    src=")+13,introduction.indexOf(".png")+4);
+                    introduction = introduction.substring(introduction.indexOf(".png")+4,introduction.length());
+                }
+            }
+            if(urlImage!=null && urlImage.trim() !="" && urlImage.indexOf("http")<0){
+                if(urlImage.indexOf("//")<0){
+                    urlImage = "http://"+urlImage;
+                }else{
+                    urlImage = "http:"+urlImage;
+                }
+            }
+
+//            if(introduction.indexOf(".jpg")+4 > introduction.indexOf("<img src=")+10){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg")+4,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" width")>0){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" width")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" width")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" alt")>0 && introduction.indexOf(".jpg\" alt")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" alt")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" alt")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" />")>0 && introduction.indexOf(".jpg\" />")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" />")>0 && introduction.indexOf(".jpg\" />")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf("<img src=")>0 && introduction.indexOf(".jpg\" />")>0 ){
+//                introduction = introduction.substring(introduction.indexOf("<img src="),introduction.length());
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf("<img src=")>0 && introduction.indexOf(".gif\" />")>0 ){
+//                introduction = introduction.substring(introduction.indexOf("<img src="),introduction.length());
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".gif\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".gif\" />")+5,introduction.length());
+//            }
+
+//            System.out.println(urlImage);
+            list.add(urlImage);
+
+        }
+
+
+        while(introduction.indexOf("<img src=")>-1){
+//            System.out.println("----------"+introduction);
+            String urlImage = "";
+            introduction = introduction.substring(introduction.indexOf("<img src="),introduction.length());
+            boolean isok = false;
+            if((!isok)&&introduction.indexOf(".jpg")>0 ){
+                if((introduction.indexOf(".jpg")+4)-(introduction.indexOf("<img src=")+10)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg")+4);
+                    introduction = introduction.substring(introduction.indexOf(".jpg")+4,introduction.length());
+                }
+            }
+            if((!isok)&&introduction.indexOf(".gif")>0){
+                if((introduction.indexOf(".gif")+4)-(introduction.indexOf("<img src=")+10)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".gif")+4);
+                    introduction = introduction.substring(introduction.indexOf(".gif")+4,introduction.length());
+                }
+            }
+            if((!isok)&&introduction.indexOf(".png")>0){
+                if((introduction.indexOf(".png")+4)-(introduction.indexOf("<img src=")+10)>110){
+
+                }else{
+                    isok = true;
+                    urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".png")+4);
+                    introduction = introduction.substring(introduction.indexOf(".png")+4,introduction.length());
+                }
+            }
+            if(urlImage!=null && urlImage.trim() !="" && urlImage.indexOf("http")<0){
+                if(urlImage.indexOf("//")<0){
+                    urlImage = "http://"+urlImage;
+                }else{
+                    urlImage = "http:"+urlImage;
+                }
+            }
+
+//            if(introduction.indexOf(".jpg")+4 > introduction.indexOf("<img src=")+10){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg")+4,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" width")>0){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" width")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" width")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" alt")>0 && introduction.indexOf(".jpg\" alt")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" alt")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" alt")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" />")>0 && introduction.indexOf(".jpg\" />")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf(".jpg\" />")>0 && introduction.indexOf(".jpg\" />")>introduction.indexOf("<img src=")){
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf("<img src=")>0 && introduction.indexOf(".jpg\" />")>0 ){
+//                introduction = introduction.substring(introduction.indexOf("<img src="),introduction.length());
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".jpg\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".jpg\" />")+5,introduction.length());
+//            }else if(introduction.indexOf("<img src=")>0 && introduction.indexOf(".gif\" />")>0 ){
+//                introduction = introduction.substring(introduction.indexOf("<img src="),introduction.length());
+//                urlImage = introduction.substring(introduction.indexOf("<img src=")+10,introduction.indexOf(".gif\" />")+4);
+//                introduction = introduction.substring(introduction.indexOf(".gif\" />")+5,introduction.length());
+//            }
+
+//            System.out.println(urlImage);
+            list.add(urlImage);
+
+        }
+
+//        for (String urlImage : list){
+//            System.out.println(urlImage);
+//        }
+        return list;
+    }
+
+//    public static void main(String[] args) {
+//        String introduction = "lass=\"ssd-widget-pic W14925793239497\" >\n" +
+//                "    <img    src=\"https://img30.360buyimg.com/sku/jfs/t9355/346/982196853/235759/653efdb1/59b2666bNfed18fb3.gif\"    alt=\"NB P5 (32-60英寸) 电视挂架 电视架 电视机挂架";
+//        System.out.println(introduction.indexOf("<img src="));
+//        String urlImage = introduction.substring(introduction.indexOf("<img    src=")+13,introduction.length());
+//        System.out.println(urlImage);
+//
+////        List<String> list = introductionToImage(introduction);
+////        System.out.println(list.size());
+//    }
+
     public static void downloadPicture(String urlImage,String imageName,String fielPath){
         try {
+            System.out.println(urlImage+"++++++++++++++++++++++++++++++");
             URL url = new URL(urlImage);
             File filePackage = new File(fielPath);
             if(!filePackage.exists()){
@@ -1324,9 +1531,10 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             e.printStackTrace();
         }
     }
-
 //    public static void main(String[] args) {
-//        downloadPicture("http://img30.360buyimg.com/popWaterMark/jfs/t1279/139/810308484/138025/bfe0342/55a5c52eN0e22f09d.jpg","G:\\images\\131665\\dsfldj.jpg","G:\\images\\131665");
+//        String imageUrl = "https://img30.360buyimg.com/sku/jfs/t5836/210/3508479450/50413/1131bcd9/593e3160N355b62cd.png";
+//        System.out.println(imageUrl.length());
+////        downloadPicture("//img30.360buyimg.com/sku/jfs/t3277/143/5324791507/82706/62138e1a/586e0a19N6cde1bfc.jpg","G:\\images\\131665\\dsfldj.jpg","G:\\images\\131665");
 //    }
 
 }

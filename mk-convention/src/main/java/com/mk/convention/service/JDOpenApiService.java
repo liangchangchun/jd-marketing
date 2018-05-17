@@ -168,4 +168,13 @@ public interface JDOpenApiService {
     * @Date: 2018/5/15 
     */ 
     JsonResult exportImg();
+
+    /**
+     * @Description: 导出详情图片
+     * @Param:
+     * @return:
+     * @Author: lzm
+     * @Date: 2018/5/15
+     */
+    JsonResult exportIntroduceImg();
 }

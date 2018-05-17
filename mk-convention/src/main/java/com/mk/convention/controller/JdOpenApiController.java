@@ -206,4 +206,10 @@ public class JdOpenApiController {
     public JsonResult exportImg(){
         return jdOpenApiService.exportImg();
     }
+
+    @RequestMapping(value = "/exportIntroduceImg",method = RequestMethod.GET)
+    @ResponseBody
+    public JsonResult exportIntroduceImg(){
+        return jdOpenApiService.exportIntroduceImg();
+    }
 }

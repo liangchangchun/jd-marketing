@@ -125,7 +125,7 @@ public class DataSource {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         } finally {
-            jdbcUtils.free(conn, ps, rs);
+            //jdbcUtils.free(conn, ps, rs);
         }
         return results;
     }

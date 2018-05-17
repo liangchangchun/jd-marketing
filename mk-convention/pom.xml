@@ -15,7 +15,7 @@
 		<groupId>com.marketing</groupId>
 		<artifactId>mk-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../mk-parent/pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
 	<properties>

@@ -41,6 +41,7 @@ public class CategoryData  extends BaseDataEvent implements DataEvent,java.io.Se
 		        data.put("token",paramData.get("token"));
 		        data.put("pageNum",paramData.get("pageNum"));
 		        data.put("pageNo",String.valueOf(page));
+		        System.out.println("请求商品池编号:"+paramData.get("pageNum"));
 		  Stopwatch stopwatch = null;
 		  JsonResult resFirst  = JDHttpTool.getInstance().packageParams(req.getMethod(),data,req.logTag);
 	        if (resFirst.get("result")==null) {
