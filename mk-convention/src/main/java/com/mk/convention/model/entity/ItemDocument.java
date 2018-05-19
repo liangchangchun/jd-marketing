@@ -47,7 +47,7 @@ public class ItemDocument {
     /**
      * 商品名称
      */
-    @Field(type = FieldType.Text,index = false)
+    @Field(type = FieldType.text,index = false)
     private String name;
 
 
@@ -63,7 +63,7 @@ public class ItemDocument {
      * 商品的描述
      */
     //@Field(type = FieldType.text, searchAnalyzer = "ik", analyzer = "ik")
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.text)
     private String description;
 
     @Override
