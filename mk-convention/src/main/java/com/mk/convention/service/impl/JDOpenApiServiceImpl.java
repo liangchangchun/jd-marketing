@@ -1163,7 +1163,7 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
             orderJdInfo.setName(orderAddress.getName());
             orderJdInfo.setProvince(2);//省份 测试 默认给了上海
             orderJdInfo.setCity(2830);//城市
-            orderJdInfo.setCounty(51832);//三级地址
+            orderJdInfo.setCounty(51800);//三级地址
             orderJdInfo.setTown(0);//四级地址 (如果该地区有四级地址，则必须传递四级地址，没有四级地址则传 0)
             orderJdInfo.setAddress(orderAddress.getLine1());
             orderJdInfo.setZip(orderAddress.getPostalCode());
@@ -1174,18 +1174,18 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         orderJdInfo.setInvoiceState(invoiceState);//开票方式(1 为随货开票，0 为订单预借，2 为集中开票 )
         orderJdInfo.setInvoiceType(invoiceType);//1 普通发票 2 增值税发票 3 电子发票
         orderJdInfo.setSelectedInvoiceTitle(selectedInvoiceTitle);//必须(发票类型：4 个人，5 单位)
-        orderJdInfo.setCompanyName(companyName);//发票抬头
+        orderJdInfo.setCompanyName("上海乐辅电子商务有限公司");//发票抬头
         orderJdInfo.setInvoiceContent(invoiceContent);//:1明细，3：电脑配件，19:耗材，22：办公用品备注:若增值发票则只能选 1 明细
         orderJdInfo.setPaymentType(paymentType);//支付方式 (1：货到付款，2：邮局付款，4：余额支付，5：公司转账（公对公转账），7：网银钱包，101：金采支付)
         orderJdInfo.setIsUseBalance(isUseBalance);//使用余额 paymentType=4 时，此值固定是 1 其他支付方式 0
         orderJdInfo.setSubmitState(submitState);//是否预占库存，0 是预占库存（需要调用确认订单接口），1 是不预占库存
         orderJdInfo.setDoOrderPriceMode(doOrderPriceMode);//下单价格模式 0: 客户端订单价格快照不做验证对比，还是以京东价格正常下单;1:必需验证客户端单价格快照，如果快照与京东价格不一致返回下单失败，需要更新商品价格后，重新下单;
-        orderJdInfo.setInvoiceName(invoiceName);//增值票收票人姓名
+        orderJdInfo.setInvoiceName("财务部");//增值票收票人姓名
         orderJdInfo.setInvoicePhone(invoicePhone);//增值票收票电话
         orderJdInfo.setInvoiceProvice(invoiceProvice);//上海
         orderJdInfo.setInvoiceCity(invoiceCity);//浦东新区
         orderJdInfo.setInvoiceCounty(invoiceCounty);//书院镇
-        orderJdInfo.setInvoiceAddress(invoiceAddress);
+        orderJdInfo.setInvoiceAddress("浦东新区书院镇石潭街109号238室");
         return orderJdInfo;
     }
 
@@ -1271,32 +1271,23 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
 
     @Override
     public JsonResult exportImg() {
-        ArrayList results = this.dataSource.executeQuery("select * from category_img", null);
+        ArrayList results = this.dataSource.executeQuery("select * from category_upc", null);
 //        for (Object obj:results){
 //            System.out.println(JsonUtils.toJson(obj));
 //        }
-        String path = "G:\\images";
         for (int i = 0 ; i< results.size();i++){
             Object[] obj = (Object[]) results.get(i);
             String sku = (String) obj[1];
             HashMap<String,String> data = new HashMap<>();
-            data.put("sku",sku);
+            data.put("sku","4098931");
             data.put("token",ACCESS_TOKEN);
-            JsonResult result = packageParams(getImage,data,"jd.getImage");
+            JsonResult result = packageParams(getDetail,data,"jd.getDetail");
 
             if(result.getResult3()!=null){
                 System.out.println(result.getResult3().toJSONString());
-                JSONArray jsonArray = result.getResult3().getJSONArray(sku);
-                for (int j = 0 ; j < jsonArray.size();j++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(j);
-                    Integer isPrimary = jsonObject.getInteger("isPrimary");
-                    String url = "http://img30.360buyimg.com/popWaterMark/"+jsonObject.getString("path");
-                    if(isPrimary==1){
-                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_main.jpg",path+"\\"+sku);
-                    }else{
-                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_"+j+".jpg",path+"\\"+sku);
-                    }
-                }
+                String upc = result.getResult3().getString("upc");
+                String sql ="update category_upc set upc = '"+upc+"' where sku_id = '"+sku+"'";
+                this.dataSource.executeUpdate(sql,null);
             }else{
                 System.out.println("查找不到图片:"+sku);
             }
@@ -1304,6 +1295,42 @@ public class JDOpenApiServiceImpl implements JDOpenApiService {
         }
         return null;
     }
+
+//    @Override
+//    public JsonResult exportImg() {
+//        ArrayList results = this.dataSource.executeQuery("select * from category_img", null);
+////        for (Object obj:results){
+////            System.out.println(JsonUtils.toJson(obj));
+////        }
+//        String path = "G:\\images";
+//        for (int i = 0 ; i< results.size();i++){
+//            Object[] obj = (Object[]) results.get(i);
+//            String sku = (String) obj[1];
+//            HashMap<String,String> data = new HashMap<>();
+//            data.put("sku",sku);
+//            data.put("token",ACCESS_TOKEN);
+//            JsonResult result = packageParams(getImage,data,"jd.getImage");
+//
+//            if(result.getResult3()!=null){
+//                System.out.println(result.getResult3().toJSONString());
+//                JSONArray jsonArray = result.getResult3().getJSONArray(sku);
+//                for (int j = 0 ; j < jsonArray.size();j++){
+//                    JSONObject jsonObject = jsonArray.getJSONObject(j);
+//                    Integer isPrimary = jsonObject.getInteger("isPrimary");
+//                    String url = "http://img30.360buyimg.com/popWaterMark/"+jsonObject.getString("path");
+//                    if(isPrimary==1){
+//                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_main.jpg",path+"\\"+sku);
+//                    }else{
+//                        downloadPicture(url,path+"\\"+sku+"\\"+sku+"_"+j+".jpg",path+"\\"+sku);
+//                    }
+//                }
+//            }else{
+//                System.out.println("查找不到图片:"+sku);
+//            }
+//
+//        }
+//        return null;
+//    }
 
     @Override
     public JsonResult exportIntroduceImg() {

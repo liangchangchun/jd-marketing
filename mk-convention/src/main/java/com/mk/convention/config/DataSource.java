@@ -1,6 +1,7 @@
 package com.mk.convention.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.mk.convention.utils.jd.AddressChange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +20,16 @@ public class DataSource {
 
     public JdbcUtils jdbcUtils = JdbcUtils.getInstance();
 
-    public DataSource(){
+    public DataSource() {
         try {
             conn = jdbcUtils.getConnection();
-        }catch (SQLException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
-            } finally {
-                //关闭资源
-                //jdbcUtils.free(conn, ps, rs);
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            //关闭资源
+            //jdbcUtils.free(conn, ps, rs);
+        }
     }
 
     //该方法执行一个update/delete/insert语句
@@ -40,8 +41,8 @@ public class DataSource {
             ps = conn.prepareStatement(sql);
             //给？赋值
             if (parameters != null) {
-                for (int i=0; i<parameters.length; i++) {
-                    ps.setString(i+1, parameters[i]);
+                for (int i = 0; i < parameters.length; i++) {
+                    ps.setString(i + 1, parameters[i]);
                 }
             }
             //执行语句
@@ -64,12 +65,12 @@ public class DataSource {
             //多个sql语句，考虑事务
             conn.setAutoCommit(false);
 
-            for (int i=0; i<sqls.length; i++) {
+            for (int i = 0; i < sqls.length; i++) {
                 if (parameters[i] != null) {
                     ps = conn.prepareStatement(sqls[i]);
 
-                    for (int j=0; j<parameters[i].length; j++) {
-                        ps.setString(j+1, parameters[i][j]);
+                    for (int j = 0; j < parameters[i].length; j++) {
+                        ps.setString(j + 1, parameters[i][j]);
                     }
 
                     ps.executeUpdate();
@@ -93,7 +94,7 @@ public class DataSource {
     }
 
     //统一的select语句，为了能够访问结果集，将结果集放入ArrayList，这样可以直接关闭资源
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public ArrayList executeQuery(String sql, String[] parameters) {
         ArrayList results = new ArrayList();
 
@@ -102,8 +103,8 @@ public class DataSource {
             ps = conn.prepareStatement(sql);
 
             if (parameters != null) {
-                for (int i=0; i<parameters.length; i++) {
-                    ps.setString(i+1, parameters[i]);
+                for (int i = 0; i < parameters.length; i++) {
+                    ps.setString(i + 1, parameters[i]);
                 }
             }
 
@@ -115,8 +116,8 @@ public class DataSource {
             while (rs.next()) {
                 Object[] objects = new Object[column];
 
-                for (int i=1; i<=column; i++) {
-                    objects[i-1] = rs.getObject(i);
+                for (int i = 1; i <= column; i++) {
+                    objects[i - 1] = rs.getObject(i);
                 }
 
                 results.add(objects);
@@ -129,4 +130,35 @@ public class DataSource {
         }
         return results;
     }
+
+
+    public ArrayList executeQueryByAddress(String sql, String[] parameters) {
+        ArrayList results = new ArrayList();
+
+        try {
+            conn = jdbcUtils.getConnection();
+            ps = conn.prepareStatement(sql);
+
+            if (parameters != null) {
+                for (int i = 0; i < parameters.length; i++) {
+                    ps.setString(i + 1, parameters[i]);
+                }
+            }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                AddressChange addressChange = new AddressChange();
+                addressChange.setAreaName(rs.getString("areaName"));
+                addressChange.setId(rs.getLong("id"));
+                results.add(addressChange);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            jdbcUtils.free(conn, ps, rs);
+        }
+        return results;
+    }
+
+
 }
